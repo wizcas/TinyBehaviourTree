@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c8ecaf4a22b168498d1e74928ee4008, type: 3}
+  m_Name: PlayerTreeData
+  m_EditorClassIdentifier: 
+  _serializedData: '{"$id":"1","$type":"Cheers.BehaviourTree.ParallelNode, Assembly-CSharp","id":4,"__type":null,"precondition":null,"name":"Root","children":[{"$id":"2","$type":"Cheers.BehaviourTree.LastFirstSelectorNode,
+    Assembly-CSharp","id":15,"__type":null,"precondition":null,"name":"Action","children":[{"$id":"3","$type":"Cheers.BehaviourTree.LastFirstSelectorNode,
+    Assembly-CSharp","id":16,"__type":null,"precondition":{"$id":"4","$type":"Player.BehaviourTree.PreconditionIsDead,
+    Assembly-CSharp","isDead":false},"name":"Alive Actions","children":[{"$id":"5","$type":"Player.BehaviourTree.PlayerActionNode,
+    Assembly-CSharp","id":17,"__type":null,"precondition":{"$id":"6","$type":"Player.BehaviourTree.PreconditionActionType,
+    Assembly-CSharp","actionType":3},"name":"Attack","children":[],"_editorRect":{"x":-300.0,"y":450.0,"width":150.0,"height":100.0}},{"$id":"7","$type":"Player.BehaviourTree.PlayerActionNode,
+    Assembly-CSharp","id":18,"__type":null,"precondition":{"$id":"8","$type":"Player.BehaviourTree.PreconditionActionType,
+    Assembly-CSharp","actionType":1},"name":"Hit","children":[],"_editorRect":{"x":-100.0,"y":450.0,"width":150.0,"height":100.0}},{"$id":"9","$type":"Player.BehaviourTree.PlayerActionNode,
+    Assembly-CSharp","id":19,"__type":null,"precondition":{"$id":"10","$type":"Player.BehaviourTree.PreconditionActionType,
+    Assembly-CSharp","actionType":2},"name":"Die","children":[],"_editorRect":{"x":100.0,"y":450.0,"width":150.0,"height":100.0}}],"_editorRect":{"x":-100.0,"y":300.0,"width":150.0,"height":100.0}}],"_editorRect":{"x":-100.0,"y":150.0,"width":150.0,"height":100.0}},{"$id":"11","$type":"Cheers.BehaviourTree.LastFirstSelectorNode,
+    Assembly-CSharp","id":20,"__type":null,"precondition":null,"name":"Status","children":[{"$id":"12","$type":"Cheers.BehaviourTree.LastFirstSelectorNode,
+    Assembly-CSharp","id":21,"__type":null,"precondition":{"$id":"13","$type":"Cheers.BehaviourTree.PreconditionAnd,
+    Assembly-CSharp","subPreconditions":[{"$id":"14","$type":"Player.BehaviourTree.PreconditionIsOnGround,
+    Assembly-CSharp","isOnGround":false},{"$id":"15","$type":"Player.BehaviourTree.PreconditionIsGravityEnabled,
+    Assembly-CSharp","isGravityEnabled":true}]},"name":"In Air w/ Alive","children":[{"$id":"16","$type":"Player.BehaviourTree.PlayerStatusNode,
+    Assembly-CSharp","status":4,"id":22,"__type":null,"precondition":{"$id":"17","$type":"Player.BehaviourTree.PreconditionIsDead,
+    Assembly-CSharp","isDead":false},"name":"Falling Alive","children":[],"_editorRect":{"x":-100.0,"y":450.0,"width":150.0,"height":100.0}},{"$id":"18","$type":"Player.BehaviourTree.PlayerStatusNode,
+    Assembly-CSharp","status":5,"id":23,"__type":null,"precondition":{"$id":"19","$type":"Player.BehaviourTree.PreconditionIsDead,
+    Assembly-CSharp","isDead":true},"name":"Falling Dead","children":[],"_editorRect":{"x":100.0,"y":450.0,"width":150.0,"height":100.0}}],"_editorRect":{"x":0.0,"y":300.0,"width":150.0,"height":100.0}},{"$id":"20","$type":"Cheers.BehaviourTree.LastFirstSelectorNode,
+    Assembly-CSharp","id":24,"__type":null,"precondition":{"$id":"21","$type":"Player.BehaviourTree.PreconditionIsOnGround,
+    Assembly-CSharp","isOnGround":true},"name":"On Ground","children":[{"$id":"22","$type":"Player.BehaviourTree.PlayerStatusNode,
+    Assembly-CSharp","status":null,"id":25,"__type":null,"precondition":{"$id":"23","$type":"Player.BehaviourTree.PreconditionStatus,
+    Assembly-CSharp","status":0},"name":"Empty","children":[],"_editorRect":{"x":-100.0,"y":450.0,"width":150.0,"height":100.0}},{"$id":"24","$type":"Player.BehaviourTree.PlayerStatusNode,
+    Assembly-CSharp","status":null,"id":26,"__type":null,"precondition":{"$id":"25","$type":"Player.BehaviourTree.PreconditionStatus,
+    Assembly-CSharp","status":1},"name":"Idle","children":[],"_editorRect":{"x":100.0,"y":450.0,"width":150.0,"height":100.0}},{"$id":"26","$type":"Player.BehaviourTree.PlayerStatusNode,
+    Assembly-CSharp","status":null,"id":27,"__type":null,"precondition":{"$id":"27","$type":"Player.BehaviourTree.PreconditionStatus,
+    Assembly-CSharp","status":2},"name":"Running","children":[],"_editorRect":{"x":300.0,"y":450.0,"width":150.0,"height":100.0}},{"$id":"28","$type":"Player.BehaviourTree.PlayerStatusNode,
+    Assembly-CSharp","status":null,"id":28,"__type":null,"precondition":{"$id":"29","$type":"Player.BehaviourTree.PreconditionStatus,
+    Assembly-CSharp","status":3},"name":"Dead","children":[],"_editorRect":{"x":500.0,"y":450.0,"width":150.0,"height":100.0}}],"_editorRect":{"x":200.0,"y":300.0,"width":150.0,"height":100.0}}],"_editorRect":{"x":100.0,"y":150.0,"width":150.0,"height":100.0}}],"_editorRect":{"x":0.0,"y":0.0,"width":150.0,"height":100.0}}'
