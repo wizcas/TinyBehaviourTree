@@ -417,7 +417,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 34055077
+  randomSeed: 610126002
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -3815,7 +3815,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 311634560}
-  - component: {fileID: 311634561}
   m_Layer: 0
   m_Name: TossPos
   m_TagString: Untagged
@@ -3837,18 +3836,6 @@ Transform:
   m_Father: {fileID: 85887223}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &311634561
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114849942599536618, guid: 3a5e335d6337ff643ba61a2e807fbfc8,
-    type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 311634559}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &399642646
 GameObject:
   m_ObjectHideFlags: 0
@@ -3938,7 +3925,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 471400761}
-  - component: {fileID: 471400762}
   m_Layer: 0
   m_Name: FootPos
   m_TagString: Untagged
@@ -3960,18 +3946,6 @@ Transform:
   m_Father: {fileID: 85887223}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &471400762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114935388063860510, guid: 3a5e335d6337ff643ba61a2e807fbfc8,
-    type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 471400760}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &976512087
 GameObject:
   m_ObjectHideFlags: 0
@@ -4040,7 +4014,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1260182563}
-  - component: {fileID: 1260182564}
   m_Layer: 0
   m_Name: DrinkPos
   m_TagString: Untagged
@@ -4062,15 +4035,3 @@ Transform:
   m_Father: {fileID: 85887223}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1260182564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114643563452311514, guid: 3a5e335d6337ff643ba61a2e807fbfc8,
-    type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1260182562}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: 
-  m_EditorClassIdentifier: 

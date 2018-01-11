@@ -24,16 +24,18 @@ namespace Cheers
         {
             base.OnInspectorGUI();
 
-            Type refType;
-            Obj[] targets;
-            if (!serializedObject.isEditingMultipleObjects)
+            Type refType = null;
+            Obj[] targets = null;
+            if (!serializedObject.isEditingMultipleObjects && serializedObject.targetObject != null)
             {
-                refType = serializedObject.targetObject.GetType();
-                targets = new[] { serializedObject.targetObject };
+                    refType = serializedObject.targetObject.GetType();
+                    targets = new[] { serializedObject.targetObject };
             }
-            else
+            else if(serializedObject.targetObjects != null)
             {
-                refType = TypeUtility.FindCommonTypeWithin(serializedObject.targetObjects.Select(obj => obj.GetType()).ToArray());
+                refType = TypeUtility.FindCommonTypeWithin(serializedObject.targetObjects
+                                                           .Select(obj => obj != null ? obj.GetType() : null)
+                                                           .Where(t=>t != null).ToArray());
                 targets = serializedObject.targetObjects;
             }
             if (refType == null)
