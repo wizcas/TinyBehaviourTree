@@ -90,5 +90,6 @@ namespace Player.BehaviourTree
     public class PlayerOrder : IOrder
     {
         public PlayerStatus? status;
+        public bool isStatusDirty;
     }
 }

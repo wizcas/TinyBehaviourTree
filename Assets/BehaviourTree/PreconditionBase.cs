@@ -16,6 +16,7 @@ namespace Cheers.BehaviourTree
     [Serializable]
     public abstract class Precondition
     {
+        public Node node;
         public abstract bool IsMatch(Blackboard snapshot);
         public override string ToString()
         {

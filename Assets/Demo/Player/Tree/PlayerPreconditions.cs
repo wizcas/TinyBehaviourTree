@@ -63,4 +63,14 @@ namespace Player.BehaviourTree
             return snapshot.status == status;
         }
     }
+
+    public class PreconditionSameStatus : Precondition<PlayerBlackboard>{
+        protected override bool IsMatch(PlayerBlackboard snapshot)
+        {
+            if(node is PlayerStatusNode){
+                return ((PlayerStatusNode)node).status == snapshot.status;
+            }
+            return false;
+        }
+    }
 }

@@ -78,7 +78,8 @@ namespace Player.BehaviourTree
                         precondition = new PreconditionAnd(new PreconditionIsOnGround(false), new PreconditionIsGravityEnabled(true))
                     }
                     .AddNodes(new PlayerStatusNode() { name = "Falling Alive", precondition = new PreconditionIsDead(false), status = PlayerStatus.FallingAlive })
-                    .AddNodes(new PlayerStatusNode() { name = "Falling Dead", precondition = new PreconditionIsDead(true), status = PlayerStatus.FallingDead }),
+                    .AddNodes(new PlayerStatusNode() { name = "Falling Dead", precondition = new PreconditionIsDead(true), status = PlayerStatus.FallingDead })
+                .AddNodes(PlayerStatusNode.MakeNode<PlayerStatusNode>("Falling Alive", new PreconditionSameStatus())),
                     new LastFirstSelectorNode()
                     {
                         name = "On Ground",

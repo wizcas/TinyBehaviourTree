@@ -167,6 +167,7 @@ namespace Cheers.BehaviourTree
         public Node parent;
         public List<Node> children = new List<Node>();
 
+        #region Editor Use
         public Rect _editorRect;
 
         [JsonIgnore]
@@ -190,6 +191,16 @@ namespace Cheers.BehaviourTree
                 v -= .15f;
                 return Color.HSVToRGB(h, s, v);
             }
+        }
+        #endregion
+
+        public static T MakeNode<T>(string name, Precondition precondition) where T: Node, new()
+        {
+            return new T
+            {
+                name = name,
+                precondition = precondition
+            };
         }
 
         public Node()
