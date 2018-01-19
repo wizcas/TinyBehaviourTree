@@ -31,13 +31,16 @@ namespace Cheers.BehaviourTree
     public struct NodeResult
     {
         public Node node;
-        public NodeState state;
         public NodeResult[] childResults;
+
+        public NodeState State
+        {
+            get { return node == null ? NodeState.Invalid : node.state; }
+        }
 
         public NodeResult(Node node)
         {
             this.node = node;
-            state = NodeState.Invalid;
             childResults = null;
         }
 
@@ -63,7 +66,7 @@ namespace Cheers.BehaviourTree
         {
             get
             {
-                switch (state)
+                switch (State)
                 {
                     case NodeState.Running:
                         return "#1a7010";
@@ -88,7 +91,7 @@ namespace Cheers.BehaviourTree
             get
             {
                 var colorFmt = "<color={0}>{1}</color>";
-                return string.Format(colorFmt, StatusColorWebString, state);
+                return string.Format(colorFmt, StatusColorWebString, State);
             }
         }
 
@@ -106,47 +109,6 @@ namespace Cheers.BehaviourTree
             return sb.ToString();
         }
         #endregion
-    }
-
-    public abstract class Blackboard
-    {
-        public abstract bool IsEmpty { get; }
-        public abstract Blackboard WithNewOrder();
-        public abstract Blackboard Copy();
-        public Blackboard ApplyChanges(Blackboard changes)
-        {
-            if (changes != null)
-            {
-                DoApplyChanges(changes);
-            }
-            return Copy();
-        }
-        protected abstract void DoApplyChanges(Blackboard changes);
-        public abstract Blackboard UpdateFrameState(Blackboard frameUpdated);
-    }
-
-    public abstract class Blackboard<T> : Blackboard where T : Blackboard
-    {
-        public sealed override Blackboard Copy()
-        {
-            var copy = Activator.CreateInstance<T>();
-            Copy(copy);
-            return copy;
-        }
-
-        protected sealed override void DoApplyChanges(Blackboard changes)
-        {
-            DoApplyChanges((T)changes);
-        }
-
-        public sealed override Blackboard UpdateFrameState(Blackboard frameUpdated)
-        {
-            return UpdateFrameState((T)frameUpdated);
-        }
-
-        public abstract void Copy(T target);
-        protected abstract void DoApplyChanges(T changes);
-        public abstract T UpdateFrameState(T frameUpdated);
     }
 
     public interface IOrder
@@ -168,7 +130,8 @@ namespace Cheers.BehaviourTree
         public List<Node> children = new List<Node>();
 
         #region Runtime Variables
-        public NodeState state;
+        [JsonIgnore]
+        public NodeState state { get; private set; }
         #endregion
 
         #region Editor Use
@@ -266,14 +229,30 @@ namespace Cheers.BehaviourTree
             children.Clear();
         }
 
-        public abstract void Enter(Blackboard snapshot);
-        public abstract NodeResult Update(Blackboard snapshot);
-        public abstract void Leave(Blackboard snapshot);
+        protected void SetState(NodeState newState, Blackboard snapshot)
+        {
+            if (newState == state) return;
+            var oldState = state;
+            state = newState;
+            if (state == NodeState.Running) Enter(snapshot);
+            else if (oldState == NodeState.Running) Leave(snapshot);
+        }
 
-        public bool IsMatch(Blackboard blackboard)
+        public virtual NodeResult Update(Blackboard snapshot)
+        {
+            if (state != NodeState.Running)
+                SetState(NodeState.Running, snapshot);
+            return new NodeResult(this);
+        }
+        public virtual void Enter(Blackboard snapshot) {}
+        public virtual void Leave(Blackboard snapshot) {}
+
+        public bool IsMatch(Blackboard snapshot)
         {            
-            var ret = precondition == null || precondition.IsMatch(blackboard);
+            var ret = precondition == null || precondition.IsMatch(snapshot);
             BTLogger.Log(this, "IsMatch {0}? {1}", precondition, ret.Pretty());
+            // exit running node if precondition is not valid anymore
+            if (!ret) SetState(NodeState.Finished, snapshot);
             return ret;
         }
 
@@ -286,9 +265,11 @@ namespace Cheers.BehaviourTree
         {
             get
             {
-                var settings = new JsonSerializerSettings();
-                settings.TypeNameHandling = TypeNameHandling.Objects;
-                settings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+                var settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Objects,
+                    PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                };
                 settings.Converters.Add(new RectJsonConverter());
                 return settings;
             }

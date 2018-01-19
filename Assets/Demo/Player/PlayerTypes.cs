@@ -32,12 +32,15 @@ namespace Player.BehaviourTree
     public class PlayerAction
     {
         public PlayerActionType type;
-        public System.Action onAction;
+        public System.Action startAction;
+        public System.Func<bool> isActionPlaying;
+        public System.Action stopAction;
 
-        public PlayerAction(PlayerActionType type, System.Action onAction)
+        public PlayerAction(PlayerActionType type, System.Action startAction, System.Action stopAction, System.Func<bool> isActionPlaying)
         {
             this.type = type;
-            this.onAction = onAction;
+            this.startAction = startAction;
+            this.isActionPlaying = isActionPlaying;
         }
     }
 }

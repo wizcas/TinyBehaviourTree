@@ -20,7 +20,7 @@ namespace Player.BehaviourTree.Tests
 
         NodeState? FindNodeStatus(string name, NodeResult result)
         {
-            if (result.node.name == name) return result.state;
+            if (result.node.name == name) return result.State;
 
             if (result.childResults == null || result.childResults.Length == 0)
                 return null;
@@ -43,43 +43,43 @@ namespace Player.BehaviourTree.Tests
         {
             var snapshot = new PlayerBlackboard()
             {
-                action = new PlayerAction(PlayerActionType.Hit, null),
+                action = new PlayerAction(PlayerActionType.Hit, null, null, ()=>true),
                 posture = PlayerPosture.Running,
                 isOnGround = true,
             };
             var result = BT.TestUpdate(rootNode, snapshot, null);
-            Assert.AreEqual(NodeState.Running, result.state);
+            Assert.AreEqual(NodeState.Running, result.State);
             Assert.AreEqual(NodeState.Running, FindNodeStatus("Hit", result));
-            Assert.AreEqual(NodeState.Finished, FindNodeStatus("Running", result));
+            Assert.AreEqual(NodeState.Running, FindNodeStatus("Running", result));
         }
         [Test]
         public void TestAttackActionAndIdleStatus()
         {
             var snapshot = new PlayerBlackboard()
             {
-                action = new PlayerAction(PlayerActionType.Cast, null),
+                action = new PlayerAction(PlayerActionType.Cast, null, null, () =>true),
                 posture = PlayerPosture.Idle,
                 isOnGround = true,
             };
             var result = BT.TestUpdate(rootNode, snapshot, null);
-            Assert.AreEqual(NodeState.Running, result.state);
+            Assert.AreEqual(NodeState.Running, result.State);
             Assert.AreEqual(NodeState.Running, FindNodeStatus("Attack", result));
-            Assert.AreEqual(NodeState.Finished, FindNodeStatus("Idle", result));
+            Assert.AreEqual(NodeState.Running, FindNodeStatus("Idle", result));
         }
         [Test]
         public void TestDieActionAndFallingAliveAliveStatus()
         {
             var snapshot = new PlayerBlackboard()
             {
-                action = new PlayerAction(PlayerActionType.Die, null),
+                action = new PlayerAction(PlayerActionType.Die, null, null, () =>true),
                 posture = PlayerPosture.Idle,
                 isOnGround = false,
                 isGravityEnabled = true,
             };
             var result = BT.TestUpdate(rootNode, snapshot, null);
-            Assert.AreEqual(NodeState.Running, result.state);
+            Assert.AreEqual(NodeState.Running, result.State);
             Assert.AreEqual(NodeState.Running, FindNodeStatus("Die", result));
-            Assert.AreEqual(NodeState.Finished, FindNodeStatus("Falling Alive", result));
+            Assert.AreEqual(NodeState.Running, FindNodeStatus("Falling Alive", result));
         }
 
         [Test]
@@ -87,14 +87,14 @@ namespace Player.BehaviourTree.Tests
         {
             var snapshot = new PlayerBlackboard()
             {
-                action = new PlayerAction(PlayerActionType.Die, null),
+                action = new PlayerAction(PlayerActionType.Die, null, null, null),
                 posture = PlayerPosture.Dead,
                 isOnGround = false,
                 isGravityEnabled = true,
             };
             var result = BT.TestUpdate(rootNode, snapshot, null);
-            Assert.AreEqual(NodeState.Finished, result.state);
-            Assert.AreEqual(NodeState.Finished, FindNodeStatus("Falling Dead", result));
+            Assert.AreEqual(NodeState.Running, result.State);
+            Assert.AreEqual(NodeState.Running, FindNodeStatus("Falling Dead", result));
         }
 
         [Test]
@@ -102,14 +102,14 @@ namespace Player.BehaviourTree.Tests
         {
             var snapshot = new PlayerBlackboard()
             {
-                action = new PlayerAction(PlayerActionType.Die, null),
+                action = new PlayerAction(PlayerActionType.Die, null, null, null),
                 posture = PlayerPosture.Dead,
                 isOnGround = true,
                 isGravityEnabled = true,
             };
             var result = BT.TestUpdate(rootNode, snapshot, null);
-            Assert.AreEqual(NodeState.Finished, result.state);
-            Assert.AreEqual(NodeState.Finished, FindNodeStatus("Dead", result));
+            Assert.AreEqual(NodeState.Running, result.State);
+            Assert.AreEqual(NodeState.Running, FindNodeStatus("Dead", result));
         }
     }
 }

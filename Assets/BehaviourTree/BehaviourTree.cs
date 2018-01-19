@@ -66,8 +66,8 @@ namespace Cheers.BehaviourTree
             BTLogger.BeginFrame(rootNode);
             _snapshot = _blackboard.ApplyChanges(request).WithNewOrder();
             _frameResult = rootNode.Update(_snapshot);
-            _blackboard.UpdateFrameState(_snapshot);
-            AfterUpdate(_snapshot);
+            _blackboard.ExecuteOrder(_snapshot.order);
+            ExecuteOrder(_snapshot.order);
             BTLogger.EndFrame(rootNode);
         }
 
@@ -104,7 +104,7 @@ namespace Cheers.BehaviourTree
                 onTreeUpdated();
         }
 
-        protected abstract void AfterUpdate(Blackboard snapshot);
+        protected abstract void ExecuteOrder(IOrder order);
 
         #region Test
         public static NodeResult TestUpdate(Node rootNode, Blackboard snapshot, Blackboard next)
@@ -120,7 +120,9 @@ namespace Cheers.BehaviourTree
         #endregion
     }
 
-    public abstract class BehaviourTree<T> : BehaviourTree where T : Blackboard
+    public abstract class BehaviourTree<T, U> : BehaviourTree 
+        where T : Blackboard
+        where U : IOrder
     {
         protected T blackboard
         {
@@ -134,11 +136,11 @@ namespace Cheers.BehaviourTree
 
         protected abstract T MakeInitBlackboard();
 
-        protected sealed override void AfterUpdate(Blackboard snapshot)
+        protected sealed override void ExecuteOrder(IOrder newOrder)
         {
-            AfterUpdate((T)snapshot);
+            ExecuteOrder((U)newOrder);
         }
 
-        protected abstract void AfterUpdate(T snapshot);
+        protected abstract void ExecuteOrder(U newOrder);
     }
 }

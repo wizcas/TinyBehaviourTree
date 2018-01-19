@@ -140,6 +140,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    [See]
     void Spawn()
     {
         _currentHp = hp;
@@ -180,11 +181,10 @@ public class PlayerController : MonoBehaviour
             posture = PlayerPosture.Empty,
             action = new PlayerAction(
                 PlayerActionType.Die,
-                OnAction(
-                    () => _mover.DieCo(),
-                    () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Dead })
-                    )
-                )
+                OnAction(() => _mover.DieCo()),
+                () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Dead }),
+                () => _actionCoroutine != null
+            )
         }, true);
     }
 
@@ -198,10 +198,9 @@ public class PlayerController : MonoBehaviour
                     //status = PlayerStatus.Empty,
                     action = new PlayerAction(
                         PlayerActionType.Hit,
-                        OnAction(
-                            () => _mover.HitBackCo(),
-                            () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running })
-                        )
+                        OnAction(() => _mover.HitBackCo()),
+                        () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running }),
+                        () => _actionCoroutine != null
                     )
                 }, true);
                 break;
@@ -214,17 +213,16 @@ public class PlayerController : MonoBehaviour
         {
             action = new PlayerAction(
                 PlayerActionType.Cast,
-                OnAction(
-                    () => _mover.CastCo(id),
-                    () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running })
-                )
+                OnAction(() => _mover.CastCo(id)),
+                () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running }),
+                () => _actionCoroutine != null
             )
         });
     }
 
     public void OnDead()
     {
-        
+
     }
 
     #endregion
@@ -237,6 +235,8 @@ public class PlayerController : MonoBehaviour
         {
             OnStatusChanged(order.posture.Value);
         }
+        if (order.actionCallback != null)
+            order.actionCallback();
     }
 
     void OnStatusChanged(PlayerPosture status)
@@ -286,25 +286,22 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    Action OnAction(Func<IEnumerator> coroutine, Action afterAction)
+    Action OnAction(Func<IEnumerator> coroutine)
     {
-        return () => StartCoroutine(OnActionCo(
-                    coroutine,
-                    afterAction
-                    ));
+        return () =>
+        {
+            _actionCoroutine = StartCoroutine(OnActionCo(coroutine));
+        };
     }
 
-    IEnumerator OnActionCo(Func<IEnumerator> coroutine, Action afterAction)
+    IEnumerator OnActionCo(Func<IEnumerator> coroutine)
     {
         if (coroutine != null)
         {
             yield return coroutine();
         }
+        StopPlayingAction();
         _tree.StopPlayingAction(null);
-        if (afterAction != null)
-        {
-            afterAction();
-        }
     }
 
     #endregion

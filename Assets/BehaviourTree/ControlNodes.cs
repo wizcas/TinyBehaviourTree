@@ -23,17 +23,7 @@ namespace Cheers.BehaviourTree
             {
                 return false;
             }
-        }
-
-        public override void Enter(Blackboard snapshot)
-        {
-            
-        }
-
-        public override void Leave(Blackboard snapshot)
-        {
-            
-        }
+        }        
     }
 
     [Serializable]
@@ -60,13 +50,14 @@ namespace Cheers.BehaviourTree
 
         public override NodeResult Update(Blackboard snapshot)
         {
-            var result = new NodeResult(this);
+            var result = base.Update(snapshot);
             List<NodeResult> childResults = new List<NodeResult>();
+            NodeState childResult = NodeState.Invalid;
             if (_runningNode != null)
             {
                 // If the previously selected node is still running, we don't do another selecting
-                result.state = UpdateChildNode(_runningNode, snapshot, childResults, false);
-                if (result.state == NodeState.Running)
+                childResult = UpdateChildNode(_runningNode, snapshot, childResults, false);
+                if (childResult == NodeState.Running)
                 {
                     result.childResults = childResults.ToArray();
                     return result;
@@ -77,33 +68,27 @@ namespace Cheers.BehaviourTree
             _runningNode = Select(snapshot, _runningNode);
             if (_runningNode == null)
             {
-                result.state = NodeState.Finished;
+                SetState(NodeState.Finished, snapshot);
             }
             else
             {
                 // update this selector node's state with latest updated children's state
-                result.state = UpdateChildNode(_runningNode, snapshot, childResults, true);                
+                childResult = UpdateChildNode(_runningNode, snapshot, childResults, true);                
             }
-            if (result.state != NodeState.Running)
+            if (childResult != NodeState.Running)
             {
                 _runningNode = null;
             }
+            SetState(childResult, snapshot);
             result.childResults = childResults.ToArray();
             return result;
         }
 
         NodeState UpdateChildNode(Node node, Blackboard snapshot, List<NodeResult> childResults, bool beginRunning)
         {
-            if(beginRunning){
-                node.Enter(snapshot);
-            }
             var nodeResult = node.Update(snapshot);
-
-            if(nodeResult.state != NodeState.Running){
-                node.Leave(snapshot);
-            }
             childResults.Add(nodeResult);
-            return nodeResult.state;
+            return nodeResult.State;
         }
 
         protected abstract Node Select(Blackboard snapshot, Node ignoredNode);
@@ -279,7 +264,7 @@ namespace Cheers.BehaviourTree
         }
         public override NodeResult Update(Blackboard snapshot)
         {
-            var result = new NodeResult(this);
+            var result = base.Update(snapshot);
             var childResults = new List<NodeResult>();
 
             // if the sequence is empty, entering this node means that child nodes should be queued and play
@@ -298,10 +283,9 @@ namespace Cheers.BehaviourTree
                 }
                 var childResult = headNode.node.Update(snapshot);
                 childResults.Add(childResult);
-                if (childResult.state == NodeState.Running)
+                if (childResult.State == NodeState.Running)
                 {
                     // the loop breaks and result returned if the head node is still running
-                    result.state = NodeState.Running;
                     result.childResults = childResults.ToArray();
                     return result;
                 }
@@ -311,7 +295,7 @@ namespace Cheers.BehaviourTree
                 finishedNode.node.Leave(snapshot);
             }
             // returns exit result when the whole sequence is finished
-            result.state = NodeState.Finished;
+            SetState(NodeState.Finished, snapshot);
             result.childResults = childResults.ToArray();
             return result;
         }
@@ -371,7 +355,7 @@ namespace Cheers.BehaviourTree
 
         public override NodeResult Update(Blackboard snapshot)
         {
-            var result = new NodeResult(this);
+            var result = base.Update(snapshot);
             var childResults = new List<NodeResult>();
             var isRunning = statusOperator == Operator.AND ? true : false;
             foreach (var child in children)
@@ -383,7 +367,7 @@ namespace Cheers.BehaviourTree
                     
                     var childResult = child.Update(snapshot);
                     childResults.Add(childResult);
-                    var isChildRunning = childResult.state == NodeState.Running;
+                    var isChildRunning = childResult.State == NodeState.Running;
 
                     if (!isChildRunning)
                         child.Leave(snapshot);
@@ -398,7 +382,6 @@ namespace Cheers.BehaviourTree
                     }
                 }
             }
-            result.state = isRunning ? NodeState.Running : NodeState.Finished;
             result.childResults = childResults.ToArray();
             if(isRunning){
                 _prevFrameChildResults = result.childResults;
@@ -406,6 +389,7 @@ namespace Cheers.BehaviourTree
             else{
                 _prevFrameChildResults = null;
             }
+            SetState(isRunning ? NodeState.Running : NodeState.Finished, snapshot);
             return result;
         }
 
@@ -414,7 +398,7 @@ namespace Cheers.BehaviourTree
 
             var prevResult = _prevFrameChildResults.FirstOrDefault(cr => cr.node == child);
             if (prevResult.node == null) return true;
-            return prevResult.state != NodeState.Running;
+            return prevResult.State != NodeState.Running;
         }
     }
 

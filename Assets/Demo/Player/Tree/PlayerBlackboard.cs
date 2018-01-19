@@ -14,9 +14,10 @@ using UnityEngine;
 namespace Player.BehaviourTree
 {
     [Serializable]
-    public class PlayerBlackboard : Blackboard<PlayerBlackboard>
+    public class PlayerBlackboard : Blackboard<PlayerBlackboard, PlayerOrder>
     {
         #region Fields
+        public bool stopCurrentPosture;
         #endregion
 
         #region Data
@@ -28,7 +29,10 @@ namespace Player.BehaviourTree
         #endregion        
 
         #region Response Data (modified by behaviour tree and send back to view)
-        public PlayerOrder order;
+        public bool HasOrder
+        {
+            get { return order != null; }
+        }
         #endregion
 
         public override bool IsEmpty
@@ -51,18 +55,17 @@ namespace Player.BehaviourTree
             target.action = action;
             target.playingAction = playingAction;
             target.order = order;
-        }
-
-        public override Blackboard WithNewOrder()
-        {
-            order = new PlayerOrder();
-            return this;
-        }
+            target.stopCurrentPosture = stopCurrentPosture;
+        }        
 
         protected override void DoApplyChanges(PlayerBlackboard change)
         {
             if (change.posture.HasValue)
             {
+                if(change.posture.Value != posture)
+                {
+                    stopCurrentPosture = true;
+                }
                 posture = change.posture.Value;
             }
             if (change.isOnGround.HasValue)
@@ -79,10 +82,15 @@ namespace Player.BehaviourTree
             }
         }
 
-        public override PlayerBlackboard UpdateFrameState(PlayerBlackboard frameUpdated)
+        protected override void AfterApplyChanges()
         {
-            playingAction = frameUpdated.playingAction;
-            return this;
+            base.AfterApplyChanges();
+            stopCurrentPosture = false;
+        }
+
+        public override void ExecuteOrder(PlayerOrder newOrder)
+        {
+            if (newOrder.clearAction) action = null;
         }
     }
 
@@ -90,6 +98,7 @@ namespace Player.BehaviourTree
     public class PlayerOrder : IOrder
     {
         public PlayerPosture? posture;
-        public bool isStatusDirty;
+        public Action actionCallback;
+        public bool clearAction;
     }
 }

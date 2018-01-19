@@ -7,9 +7,6 @@
 
 using Cheers.BehaviourTree;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace Player.BehaviourTree
 {
@@ -18,7 +15,6 @@ namespace Player.BehaviourTree
     public class PlayerActionNode : BehaviourNode<PlayerBlackboard>
     {
         public PlayerActionType actionType;
-        PlayerAction _playingAction;
 
         public static PlayerActionNode New(string name, PlayerActionType type, Precondition precondition = null)
         {
@@ -27,24 +23,20 @@ namespace Player.BehaviourTree
             return node;
         }
 
-        protected override bool IsKeepPlaying(PlayerBlackboard snapshot)
-        {
-            // If there is no playing action OR the playing action is this action itself, 
-            // we consider this action can be played
-            // i.e. The action is playable only when PlayerBlackboard.playingAction is externally set to null
-
-            // So actions that interrupt playing ones should be responsible to set playingAction as null
-            // in order to make it play forcely.
-
-            return snapshot.playingAction == null || snapshot.action.type == _playingAction.type;
-        }
-
         protected override void Start(PlayerBlackboard snapshot)
         {
+            PrettyLog.Log("take action: {0}", snapshot.action == null ? "(no action)" : snapshot.action.type.ToString());
+            if (snapshot.HasOrder)
+                snapshot.order.actionCallback = snapshot.action.startAction;
         }
 
         protected override void Stop(PlayerBlackboard snapshot)
         {
+            if (snapshot.HasOrder)
+            {
+                snapshot.order.actionCallback = snapshot.action.stopAction;
+                snapshot.order.clearAction = true;
+            }
         }
 
         protected override bool Play(PlayerBlackboard snapshot)
@@ -52,19 +44,11 @@ namespace Player.BehaviourTree
             if (snapshot.action == null)
                 return false;
 
-            _playingAction = snapshot.action;
-
-            // if the action is playing, do not send the playing order again
-            if (snapshot.playingAction != null && snapshot.playingAction.type == _playingAction.type) return true;
-
-            snapshot.playingAction = _playingAction;
-            PrettyLog.Log("take action: {0}", snapshot.action == null ? "(no action)" : _playingAction.type.ToString());
-            if (snapshot.action.onAction != null)
+            if (snapshot.action.isActionPlaying != null)
             {
-                snapshot.action.onAction();
+                return snapshot.action.isActionPlaying();
             }
-            // Action is continuous operation, which can only be stopped by setting playingAction to null
-            return true;
+            return false;            
         }
     }
 
@@ -82,19 +66,17 @@ namespace Player.BehaviourTree
             return node;
         }
 
-        protected override bool IsKeepPlaying(PlayerBlackboard snapshot)
-        {
-            return true;
-        }
-
         protected override bool Play(PlayerBlackboard snapshot)
         {
-            return true;
+            return !snapshot.stopCurrentPosture;
         }
 
         protected override void Start(PlayerBlackboard snapshot)
         {
-            snapshot.order.posture = posture;
+            if (snapshot.order != null)
+            {
+                snapshot.order.posture = posture;
+            }
         }
 
         protected override void Stop(PlayerBlackboard snapshot)

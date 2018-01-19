@@ -29,8 +29,7 @@ namespace Cheers.BehaviourTree
                 return ColorHelper.ByWeb("#55a8ba");
             }
         }
-
-        protected abstract bool IsKeepPlaying(T snapshot);
+        
         protected abstract void Start(T snapshot);
         protected abstract bool Play(T snapshot);
         protected abstract void Stop(T snapshot);
@@ -50,40 +49,45 @@ namespace Cheers.BehaviourTree
 
         public sealed override void Enter(Blackboard snapshot)
         {
+            base.Enter(snapshot);
             T typedSnapshot;
             if (!ValidateSnapshot(snapshot, out typedSnapshot))
             {
-                return;
+                SetState(NodeState.Invalid, snapshot);
             }
-            Start(typedSnapshot);
+            else
+            {
+                Start(typedSnapshot);
+            }
         }
 
         public sealed override NodeResult Update(Blackboard snapshot)
         {
-            T typedSnapshot;
-            if (!ValidateSnapshot(snapshot, out typedSnapshot))
+            var result = base.Update(snapshot); // Calls Enter() in the base method. State becomes Running if everything's OK.
+            if (state == NodeState.Running) // If the node is entered successfully, do updating
             {
-                return new NodeResult(this) { state = NodeState.Invalid };
+                T typedSnapshot;
+                if (ValidateSnapshot(snapshot, out typedSnapshot))
+                {
+                    var isRunning = Play(typedSnapshot);
+                    SetState(isRunning ? NodeState.Running : NodeState.Finished, snapshot);
+                }
+                else
+                {
+                    SetState(NodeState.Invalid, snapshot);
+                }
             }
-
-            var canPlay = IsKeepPlaying(typedSnapshot);
-            bool isStillPlaying = false;
-            if (canPlay)
-            {
-                isStillPlaying = Play(typedSnapshot);
-            }
-            var resultStatus = isStillPlaying ? NodeState.Running : NodeState.Finished;
-            return new NodeResult(this) { state = resultStatus };
+            return result;
         }
 
         public sealed override void Leave(Blackboard snapshot)
         {
+            base.Leave(snapshot);
             T typedSnapshot;
-            if (!ValidateSnapshot(snapshot, out typedSnapshot))
+            if (ValidateSnapshot(snapshot, out typedSnapshot))
             {
-                return;
+                Stop(typedSnapshot);
             }
-            Stop(typedSnapshot);
         }
     }
 }

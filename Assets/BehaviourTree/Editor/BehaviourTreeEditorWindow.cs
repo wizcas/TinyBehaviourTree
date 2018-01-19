@@ -279,7 +279,7 @@ namespace Cheers.BehaviourTree.Editor
                 style.normal.textColor = Color.white;
                 oldbg = GUI.backgroundColor;
                 GUI.backgroundColor = frameResult.Value.StatusColor;
-                GUI.Box(resultRect, frameResult.Value.state.ToString(), style);
+                GUI.Box(resultRect, frameResult.Value.State.ToString(), style);
                 GUI.backgroundColor = oldbg;
             }
             // Draw linking curves
