@@ -30,27 +30,60 @@ namespace Cheers.BehaviourTree
             }
         }
 
-        protected abstract bool CanPlay(T snapshot);
+        protected abstract bool CheckKeepPlaying(T snapshot);
+        protected abstract bool Start(T snapshot);
         protected abstract bool Play(T snapshot);
+        protected abstract bool Stop(T snapshot);
 
-        public sealed override NodeResult Update(Blackboard snapshot)
-        {
+        bool ValidateSnapshot(Blackboard snapshot, out T typedSnapshot){
             var actualType = snapshot.GetType();
             if (actualType != typeof(T) && actualType.IsSubclassOf(typeof(T)) && typeof(T).IsAssignableFrom(actualType))
             {
                 PrettyLog.Error("{0} can not be converted to {1}", actualType, typeof(T));
+                typedSnapshot = null;
+                return false;
+            }
+
+            typedSnapshot = (T)snapshot;
+            return true;
+        }
+
+        public sealed override void Enter(Blackboard snapshot)
+        {
+            T typedSnapshot;
+            if (!ValidateSnapshot(snapshot, out typedSnapshot))
+            {
+                return;
+            }
+            Start(typedSnapshot);
+        }
+
+        public sealed override NodeResult Update(Blackboard snapshot)
+        {
+            T typedSnapshot;
+            if (!ValidateSnapshot(snapshot, out typedSnapshot))
+            {
                 return new NodeResult(this) { state = NodeState.Invalid };
             }
 
-            var typedSnapshot = (T)snapshot;
-            var canPlay = CanPlay(typedSnapshot);
+            var canPlay = CheckKeepPlaying(typedSnapshot);
             bool isStillPlaying = false;
             if (canPlay)
             {
-                isStillPlaying = Play((T)snapshot);
+                isStillPlaying = Play(typedSnapshot);
             }
             var resultStatus = isStillPlaying ? NodeState.Running : NodeState.Finished;
             return new NodeResult(this) { state = resultStatus };
+        }
+
+        public sealed override void Leave(Blackboard snapshot)
+        {
+            T typedSnapshot;
+            if (!ValidateSnapshot(snapshot, out typedSnapshot))
+            {
+                return;
+            }
+            Stop(typedSnapshot);
         }
     }
 }

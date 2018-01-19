@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Cheers.BehaviourTree
 {
@@ -22,6 +23,16 @@ namespace Cheers.BehaviourTree
             {
                 return false;
             }
+        }
+
+        public override void Enter(Blackboard snapshot)
+        {
+            
+        }
+
+        public override void Leave(Blackboard snapshot)
+        {
+            
         }
     }
 
@@ -54,7 +65,7 @@ namespace Cheers.BehaviourTree
             if (_runningNode != null)
             {
                 // If the previously selected node is still running, we don't do another selecting
-                result.state = UpdateChildNode(_runningNode, snapshot, childResults);
+                result.state = UpdateChildNode(_runningNode, snapshot, childResults, false);
                 if (result.state == NodeState.Running)
                 {
                     result.childResults = childResults.ToArray();
@@ -71,7 +82,7 @@ namespace Cheers.BehaviourTree
             else
             {
                 // update this selector node's state with latest updated children's state
-                result.state = UpdateChildNode(_runningNode, snapshot, childResults);                
+                result.state = UpdateChildNode(_runningNode, snapshot, childResults, true);                
             }
             if (result.state != NodeState.Running)
             {
@@ -81,9 +92,16 @@ namespace Cheers.BehaviourTree
             return result;
         }
 
-        NodeState UpdateChildNode(Node node, Blackboard snapshot, List<NodeResult> childResults)
+        NodeState UpdateChildNode(Node node, Blackboard snapshot, List<NodeResult> childResults, bool beginRunning)
         {
+            if(beginRunning){
+                node.Enter(snapshot);
+            }
             var nodeResult = node.Update(snapshot);
+
+            if(nodeResult.state != NodeState.Running){
+                node.Leave(snapshot);
+            }
             childResults.Add(nodeResult);
             return nodeResult.state;
         }
@@ -247,7 +265,7 @@ namespace Cheers.BehaviourTree
     public class SequenceNode : ControlNode
     {
         [JsonIgnore]
-        public Queue<Node> runningNodes = new Queue<Node>();
+        public Queue<QueuedNode> runningNodes = new Queue<QueuedNode>();
         public override Color EditorColor
         {
             get
@@ -273,7 +291,12 @@ namespace Cheers.BehaviourTree
             while (runningNodes.Count > 0)
             {
                 var headNode = runningNodes.Peek();
-                var childResult = headNode.Update(snapshot);
+                // If this node is accessed by the first time, call its Enter() method
+                if(headNode.beginRunning){
+                    headNode.node.Enter(snapshot);
+                    headNode.beginRunning = false;
+                }
+                var childResult = headNode.node.Update(snapshot);
                 childResults.Add(childResult);
                 if (childResult.state == NodeState.Running)
                 {
@@ -282,8 +305,10 @@ namespace Cheers.BehaviourTree
                     result.childResults = childResults.ToArray();
                     return result;
                 }
-                // following nodes should be proceeded as many as possible in a single frame
-                runningNodes.Dequeue();
+                // queued nodes should be proceeded as many as possible in a single frame
+                // so dequeue the head and proceed the next queued node
+                var finishedNode = runningNodes.Dequeue();
+                finishedNode.node.Leave(snapshot);
             }
             // returns exit result when the whole sequence is finished
             result.state = NodeState.Finished;
@@ -297,8 +322,18 @@ namespace Cheers.BehaviourTree
             {
                 if (child.IsMatch(snapshot))
                 {
-                    runningNodes.Enqueue(child);
+                    runningNodes.Enqueue(new QueuedNode(child));
                 }
+            }
+        }
+
+        public class QueuedNode{
+            public bool beginRunning;
+            public Node node;
+
+            public QueuedNode(Node node){
+                this.node = node;
+                beginRunning = true;
             }
         }
     }
@@ -324,12 +359,16 @@ namespace Cheers.BehaviourTree
                 return ColorHelper.ByWeb("#8cb679");
             }
         }
+
+        NodeResult[] _prevFrameChildResults;
+
         public static ParallelNode New(string name, Operator op, Precondition precondition = null)
         {
             var node = Node.MakeNode<ParallelNode>(name, precondition);
             node.statusOperator = op;
             return node;
         }
+
         public override NodeResult Update(Blackboard snapshot)
         {
             var result = new NodeResult(this);
@@ -339,9 +378,15 @@ namespace Cheers.BehaviourTree
             {
                 if (child.IsMatch(snapshot))
                 {
+                    if (IsChildBeginRunning(child))
+                        child.Enter(snapshot);
+                    
                     var childResult = child.Update(snapshot);
                     childResults.Add(childResult);
                     var isChildRunning = childResult.state == NodeState.Running;
+
+                    if (!isChildRunning)
+                        child.Leave(snapshot);
                     switch (statusOperator)
                     {
                         case Operator.AND:
@@ -355,7 +400,21 @@ namespace Cheers.BehaviourTree
             }
             result.state = isRunning ? NodeState.Running : NodeState.Finished;
             result.childResults = childResults.ToArray();
+            if(isRunning){
+                _prevFrameChildResults = result.childResults;
+            }
+            else{
+                _prevFrameChildResults = null;
+            }
             return result;
+        }
+
+        bool IsChildBeginRunning(Node child){
+            if (_prevFrameChildResults == null || _prevFrameChildResults.Length == 0) return true;
+
+            var prevResult = _prevFrameChildResults.FirstOrDefault(cr => cr.node == child);
+            if (prevResult.node == null) return true;
+            return prevResult.state != NodeState.Running;
         }
     }
 

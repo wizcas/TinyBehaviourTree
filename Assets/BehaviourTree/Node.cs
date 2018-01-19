@@ -262,7 +262,9 @@ namespace Cheers.BehaviourTree
             children.Clear();
         }
 
+        public abstract void Enter(Blackboard snapshot);
         public abstract NodeResult Update(Blackboard snapshot);
+        public abstract void Leave(Blackboard snapshot);
 
         public bool IsMatch(Blackboard blackboard)
         {            

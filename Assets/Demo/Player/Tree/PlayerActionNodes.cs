@@ -27,7 +27,7 @@ namespace Player.BehaviourTree
             return node;
         }
 
-        protected override bool CanPlay(PlayerBlackboard snapshot)
+        protected override bool CheckKeepPlaying(PlayerBlackboard snapshot)
         {
             // If there is no playing action OR the playing action is this action itself, 
             // we consider this action can be played
@@ -37,6 +37,16 @@ namespace Player.BehaviourTree
             // in order to make it play forcely.
 
             return snapshot.playingAction == null || snapshot.action.type == _playingAction.type;
+        }
+
+        protected override bool Start(PlayerBlackboard snapshot)
+        {
+            return true;
+        }
+
+        protected override bool Stop(PlayerBlackboard snapshot)
+        {
+            return true;
         }
 
         protected override bool Play(PlayerBlackboard snapshot)
@@ -74,7 +84,7 @@ namespace Player.BehaviourTree
             return node;
         }
 
-        protected override bool CanPlay(PlayerBlackboard snapshot)
+        protected override bool CheckKeepPlaying(PlayerBlackboard snapshot)
         {
             return true;
         }
@@ -87,5 +97,16 @@ namespace Player.BehaviourTree
             }
             return false; // Status is an instant operation, so it always marked finished in every update
         }
+
+        protected override bool Start(PlayerBlackboard snapshot)
+        {
+            return true;
+        }
+
+        protected override bool Stop(PlayerBlackboard snapshot)
+        {
+            return true;
+        }
+
     }
 }
