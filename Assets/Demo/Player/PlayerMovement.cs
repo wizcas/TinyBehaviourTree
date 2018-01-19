@@ -205,10 +205,13 @@ public class PlayerMovement : MonoBehaviour
         _isMovingRight = true;
         _jumpSpeed = 0f;
         _isJumping = false;
-        if (Speed == 0)
-            Stop();
-        else
-            Run();
+        if (!_controller.IsDead)
+        {
+            if (Speed == 0)
+                Stop();
+            else
+                Run();
+        }
     }
 
     public void Fall(bool isAlive)

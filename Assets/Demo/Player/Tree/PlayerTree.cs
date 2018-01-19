@@ -55,7 +55,6 @@ namespace Player.BehaviourTree
             if (root == null)
             {
                 root = ParallelNode.New("Root", ParallelNode.Operator.OR, null);
-                //root = new ParallelNode() { name = "Root", statusOperator = ParallelNode.Operator.OR };
             }
             root.Clear();
 
@@ -104,18 +103,6 @@ namespace Player.BehaviourTree
         }
 
         #region API
-        public void StopPlayingAction(PlayerAction enteringAction)
-        {
-            var pb = blackboard;
-            if (pb.playingAction == enteringAction) return;
-            // clear the action state if it's the playing action
-            // or the action will be played in next frame again
-            if (pb.playingAction == pb.action)
-            {
-                pb.action = null;
-            }
-            pb.playingAction = null;
-        }
         #endregion
 
         #region Test

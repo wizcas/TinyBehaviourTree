@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour
     PlayerMovement _mover;
 
     #region Status
-    PlayerPosture _status = PlayerPosture.Empty;
+    PlayerPosture _posture = PlayerPosture.Empty;
     bool _isStatusDirty = true;
 
     [ReadOnly, SerializeField]
@@ -91,24 +91,14 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        if (_deadNote != null)
-        {
-            _deadNote.gameObject.SetActive(false);
-        }
-        if (_resumeTip != null)
-        {
-            _resumeTip.gameObject.SetActive(true);
-        }
+        Spawn();
     }
     #endregion
 
     private void Update()
     {
-        UpdateStatus();
-        if (!IsDead)
-        {
-            UpdateInput();
-        }
+        UpdatePosture();
+        UpdateInput();
         if (_endingPoint != null && transform.position.x >= _endingPoint.position.x)
         {
             Camera.main.GetComponent<CameraController>().target = null;
@@ -122,9 +112,37 @@ public class PlayerController : MonoBehaviour
     #region Control
     void UpdateInput()
     {
+        // Reset
+        if (Input.GetKeyDown(KeyCode.Return | KeyCode.KeypadEnter))
+        {
+            Spawn();
+            return;
+        }
+        if (IsDead)
+        {
+            return;
+        }
+        // Action
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //AlchemyLab.Instance.UseCurrentPotion();
+            TossPotion(0);
+        }
+        else if (Input.GetKeyDown(KeyCode.F))
+        {
+            Damage(1);
+        }
+        else if (Input.GetKey(KeyCode.B))
+        {
+            Damage(99999);
+        }
+        // Move
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            Run();
+        }
+        else if(Input.GetKeyUp(KeyCode.RightArrow))
+        {
+            Stop();
         }
     }
     #endregion
@@ -136,17 +154,16 @@ public class PlayerController : MonoBehaviour
         _tree.WriteOnBlackboard(request);
         if (request.action != null && immediateAction)
         {
-            _tree.StopPlayingAction(request.action);
+            StopPlayingAction();
         }
     }
 
     [See]
     void Spawn()
     {
+        transform.position = Vector3.zero;
         _currentHp = hp;
-        _mover.Reset();
-        _isStatusDirty = true;
-        Run();
+        Stop();
     }
 
     void Run()
@@ -159,7 +176,7 @@ public class PlayerController : MonoBehaviour
         SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Idle });
     }
 
-    void Damage(int dmg, DamageType type)
+    void Damage(int dmg)
     {
         if (IsDead) return;
 
@@ -170,15 +187,16 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            LoseHp(dmg, type);
+            LoseHp();
         }
     }
 
     public void Die()
     {
+        StopPlayingAction();
         SendBehaviourRequest(new PlayerBlackboard
         {
-            posture = PlayerPosture.Empty,
+            //posture = PlayerPosture.Empty,
             action = new PlayerAction(
                 PlayerActionType.Die,
                 OnAction(() => _mover.DieCo()),
@@ -188,23 +206,18 @@ public class PlayerController : MonoBehaviour
         }, true);
     }
 
-    public void LoseHp(int dmg, DamageType type)
+    public void LoseHp()
     {
-        switch (type)
+        StopPlayingAction();
+        SendBehaviourRequest(new PlayerBlackboard
         {
-            case DamageType.Normal:
-                SendBehaviourRequest(new PlayerBlackboard
-                {
-                    //status = PlayerStatus.Empty,
-                    action = new PlayerAction(
-                        PlayerActionType.Hit,
-                        OnAction(() => _mover.HitBackCo()),
-                        () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running }),
-                        () => _actionCoroutine != null
-                    )
-                }, true);
-                break;
-        }
+            action = new PlayerAction(
+                PlayerActionType.Hit,
+                OnAction(() => _mover.HitBackCo()),
+                null,
+                () => _actionCoroutine != null
+            )
+        }, true);
     }
 
     void TossPotion(int id)
@@ -214,7 +227,7 @@ public class PlayerController : MonoBehaviour
             action = new PlayerAction(
                 PlayerActionType.Cast,
                 OnAction(() => _mover.CastCo(id)),
-                () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running }),
+                null,
                 () => _actionCoroutine != null
             )
         });
@@ -233,25 +246,26 @@ public class PlayerController : MonoBehaviour
     {
         if (order.posture.HasValue)
         {
-            OnStatusChanged(order.posture.Value);
+            OnPostureChanged(order.posture.Value);
         }
         if (order.actionCallback != null)
             order.actionCallback();
     }
 
-    void OnStatusChanged(PlayerPosture status)
+    void OnPostureChanged(PlayerPosture newPosture)
     {
         //ConsoleProDebug.Watch("Status -> ", status.ToString());
-        if (_status == status) return;
+        if (_posture == newPosture) return;
         //PrettyLog.Log("Change status: {0} => {1}", _status, status);
-        _status = status; // Status will be updated in the next frame
+        _posture = newPosture; // Status will be updated in the next frame
         _isStatusDirty = true;
     }
-    void UpdateStatus()
+    void UpdatePosture()
     {
+        if (_actionCoroutine != null) return;
         if (!_isStatusDirty) return;
         _isStatusDirty = false;
-        switch (_status)
+        switch (_posture)
         {
             case PlayerPosture.Idle:
                 _mover.Stop();
@@ -260,8 +274,8 @@ public class PlayerController : MonoBehaviour
                 _mover.Run();
                 break;
             case PlayerPosture.Dead:
-                _mover.Reset();
-                //OnDead();
+                //_mover.Reset();
+                OnDead();
                 break;
             case PlayerPosture.FallingAlive:
                 _mover.Fall(true);
@@ -283,6 +297,7 @@ public class PlayerController : MonoBehaviour
         {
             StopCoroutine(_actionCoroutine);
             _actionCoroutine = null;
+            //_isStatusDirty = true;
         }
     }
 
@@ -301,7 +316,6 @@ public class PlayerController : MonoBehaviour
             yield return coroutine();
         }
         StopPlayingAction();
-        _tree.StopPlayingAction(null);
     }
 
     #endregion

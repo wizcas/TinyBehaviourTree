@@ -44,6 +44,9 @@ namespace Player.BehaviourTree
             if (snapshot.action == null)
                 return false;
 
+            // If it's the frame that enters, let the action play
+            if (snapshot.HasOrder && snapshot.order.actionCallback != null) return true;
+
             if (snapshot.action.isActionPlaying != null)
             {
                 return snapshot.action.isActionPlaying();
@@ -81,6 +84,7 @@ namespace Player.BehaviourTree
 
         protected override void Stop(PlayerBlackboard snapshot)
         {
+            snapshot.order.posture = PlayerPosture.Empty;
         }
 
     }

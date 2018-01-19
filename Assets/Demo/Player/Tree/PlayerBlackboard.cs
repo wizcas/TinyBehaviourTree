@@ -70,6 +70,10 @@ namespace Player.BehaviourTree
             }
             if (change.isOnGround.HasValue)
             {
+                if(change.isOnGround.Value != isOnGround)
+                {
+                    stopCurrentPosture = true;
+                }
                 isOnGround = change.isOnGround.Value;
             }
             if (change.isGravityEnabled.HasValue)

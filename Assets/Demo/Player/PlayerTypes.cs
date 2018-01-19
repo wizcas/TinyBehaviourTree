@@ -40,6 +40,7 @@ namespace Player.BehaviourTree
         {
             this.type = type;
             this.startAction = startAction;
+            this.stopAction = stopAction;
             this.isActionPlaying = isActionPlaying;
         }
     }
