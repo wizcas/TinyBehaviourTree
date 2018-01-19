@@ -64,8 +64,7 @@ namespace Player.BehaviourTree
                     LastFirstSelectorNode.New("Alive Actions", new PreconditionIsDead(false))
                     .AddNodes(
                         PlayerActionNode.New("Attack", PlayerActionType.Cast, new PreconditionIsNodeAction()),
-                        PlayerActionNode.New("Hit", PlayerActionType.Hit, new PreconditionIsNodeAction()),
-                        PlayerActionNode.New("Die", PlayerActionType.Die, new PreconditionIsNodeAction())
+                        PlayerActionNode.New("Hit", PlayerActionType.Hit, new PreconditionIsNodeAction())
                     )
                 ),
                 LastFirstSelectorNode.New("Posture")
@@ -130,31 +129,31 @@ namespace Player.BehaviourTree
             };
             ExecuteTest(request);
         }
-        [See]
-        void TestFallingAliveAndDie()
-        {
-            var request = new PlayerBlackboard()
-            {
-                action = new PlayerAction(PlayerActionType.Die, null, null, null),
-                posture = PlayerPosture.Idle,
-                isOnGround = false,
-                isGravityEnabled = true,
-                playingAction = null,
-            };
-            ExecuteTest(request);
-        }
-        [See]
-        void TestFallingDead()
-        {
-            var request = new PlayerBlackboard()
-            {
-                action = new PlayerAction(PlayerActionType.Die, null, null, null),
-                posture = PlayerPosture.Dead,
-                isOnGround = false,
-                isGravityEnabled = true,
-            };
-            ExecuteTest(request);
-        }
+        //[See]
+        //void TestFallingAliveAndDie()
+        //{
+        //    var request = new PlayerBlackboard()
+        //    {
+        //        action = new PlayerAction(PlayerActionType.Die, null, null, null),
+        //        posture = PlayerPosture.Idle,
+        //        isOnGround = false,
+        //        isGravityEnabled = true,
+        //        playingAction = null,
+        //    };
+        //    ExecuteTest(request);
+        //}
+        //[See]
+        //void TestFallingDead()
+        //{
+        //    var request = new PlayerBlackboard()
+        //    {
+        //        action = new PlayerAction(PlayerActionType.Die, null, null, null),
+        //        posture = PlayerPosture.Dead,
+        //        isOnGround = false,
+        //        isGravityEnabled = true,
+        //    };
+        //    ExecuteTest(request);
+        //}
 
         void ExecuteTest(PlayerBlackboard request)
         {

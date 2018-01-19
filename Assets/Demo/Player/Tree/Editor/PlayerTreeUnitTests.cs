@@ -71,14 +71,12 @@ namespace Player.BehaviourTree.Tests
         {
             var snapshot = new PlayerBlackboard()
             {
-                action = new PlayerAction(PlayerActionType.Die, null, null, () =>true),
                 posture = PlayerPosture.Idle,
                 isOnGround = false,
                 isGravityEnabled = true,
             };
             var result = BT.TestUpdate(rootNode, snapshot, null);
             Assert.AreEqual(NodeState.Running, result.State);
-            Assert.AreEqual(NodeState.Running, FindNodeStatus("Die", result));
             Assert.AreEqual(NodeState.Running, FindNodeStatus("Falling Alive", result));
         }
 
@@ -87,7 +85,6 @@ namespace Player.BehaviourTree.Tests
         {
             var snapshot = new PlayerBlackboard()
             {
-                action = new PlayerAction(PlayerActionType.Die, null, null, null),
                 posture = PlayerPosture.Dead,
                 isOnGround = false,
                 isGravityEnabled = true,
@@ -102,7 +99,6 @@ namespace Player.BehaviourTree.Tests
         {
             var snapshot = new PlayerBlackboard()
             {
-                action = new PlayerAction(PlayerActionType.Die, null, null, null),
                 posture = PlayerPosture.Dead,
                 isOnGround = true,
                 isGravityEnabled = true,

@@ -25,7 +25,6 @@ namespace Player.BehaviourTree
     {
         None,
         Hit,
-        Die,
         Cast
     }
 

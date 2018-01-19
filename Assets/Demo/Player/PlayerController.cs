@@ -136,7 +136,7 @@ public class PlayerController : MonoBehaviour
             Damage(99999);
         }
         // Move
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             Run();
         }
@@ -163,6 +163,7 @@ public class PlayerController : MonoBehaviour
     {
         transform.position = Vector3.zero;
         _currentHp = hp;
+        StopPlayingAction();
         Stop();
     }
 
@@ -196,13 +197,13 @@ public class PlayerController : MonoBehaviour
         StopPlayingAction();
         SendBehaviourRequest(new PlayerBlackboard
         {
-            //posture = PlayerPosture.Empty,
-            action = new PlayerAction(
-                PlayerActionType.Die,
-                OnAction(() => _mover.DieCo()),
-                () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Dead }),
-                () => _actionCoroutine != null
-            )
+            posture = PlayerPosture.Dead,
+            //action = new PlayerAction(
+            //    PlayerActionType.Die,
+            //    OnAction(() => _mover.DieCo()),
+            //    () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Dead }),
+            //    () => _actionCoroutine != null
+            //)
         }, true);
     }
 
@@ -231,11 +232,6 @@ public class PlayerController : MonoBehaviour
                 () => _actionCoroutine != null
             )
         });
-    }
-
-    public void OnDead()
-    {
-
     }
 
     #endregion
@@ -274,8 +270,7 @@ public class PlayerController : MonoBehaviour
                 _mover.Run();
                 break;
             case PlayerPosture.Dead:
-                //_mover.Reset();
-                OnDead();
+                OnAction(() => _mover.DieCo())();
                 break;
             case PlayerPosture.FallingAlive:
                 _mover.Fall(true);
@@ -297,7 +292,7 @@ public class PlayerController : MonoBehaviour
         {
             StopCoroutine(_actionCoroutine);
             _actionCoroutine = null;
-            //_isStatusDirty = true;
+            _isStatusDirty = true;
         }
     }
 
