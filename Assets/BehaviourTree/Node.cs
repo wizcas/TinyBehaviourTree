@@ -167,6 +167,10 @@ namespace Cheers.BehaviourTree
         public Node parent;
         public List<Node> children = new List<Node>();
 
+        #region Runtime Variables
+        public NodeState state;
+        #endregion
+
         #region Editor Use
         public Rect _editorRect;
 

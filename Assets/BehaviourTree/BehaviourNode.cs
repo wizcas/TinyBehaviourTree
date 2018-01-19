@@ -31,9 +31,9 @@ namespace Cheers.BehaviourTree
         }
 
         protected abstract bool IsKeepPlaying(T snapshot);
-        protected abstract bool Start(T snapshot);
+        protected abstract void Start(T snapshot);
         protected abstract bool Play(T snapshot);
-        protected abstract bool Stop(T snapshot);
+        protected abstract void Stop(T snapshot);
 
         bool ValidateSnapshot(Blackboard snapshot, out T typedSnapshot){
             var actualType = snapshot.GetType();

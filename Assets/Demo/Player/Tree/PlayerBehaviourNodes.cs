@@ -39,14 +39,12 @@ namespace Player.BehaviourTree
             return snapshot.playingAction == null || snapshot.action.type == _playingAction.type;
         }
 
-        protected override bool Start(PlayerBlackboard snapshot)
+        protected override void Start(PlayerBlackboard snapshot)
         {
-            return true;
         }
 
-        protected override bool Stop(PlayerBlackboard snapshot)
+        protected override void Stop(PlayerBlackboard snapshot)
         {
-            return true;
         }
 
         protected override bool Play(PlayerBlackboard snapshot)
@@ -74,7 +72,7 @@ namespace Player.BehaviourTree
     [PrettyLog.Provider("PlayerTree", "status", "orange", "green")]
     public class PlayerPostureNode : BehaviourNode<PlayerBlackboard>
     {
-        public PlayerPosture? posture = null;
+        public PlayerPosture posture;
 
 
         public static PlayerPostureNode New(string name, PlayerPosture posture, Precondition precondition = null)
@@ -91,21 +89,16 @@ namespace Player.BehaviourTree
 
         protected override bool Play(PlayerBlackboard snapshot)
         {
-            if (snapshot.order != null)
-            {
-                snapshot.order.posture = posture.HasValue ? posture.Value : snapshot.posture;
-            }
-            return false; // Status is an instant operation, so it always marked finished in every update
-        }
-
-        protected override bool Start(PlayerBlackboard snapshot)
-        {
             return true;
         }
 
-        protected override bool Stop(PlayerBlackboard snapshot)
+        protected override void Start(PlayerBlackboard snapshot)
         {
-            return true;
+            snapshot.order.posture = posture;
+        }
+
+        protected override void Stop(PlayerBlackboard snapshot)
+        {
         }
 
     }
