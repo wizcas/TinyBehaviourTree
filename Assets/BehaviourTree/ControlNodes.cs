@@ -245,7 +245,7 @@ namespace Cheers.BehaviourTree
     public class SequenceNode : ControlNode
     {
         [JsonIgnore]
-        public Queue<QueuedNode> runningNodes = new Queue<QueuedNode>();
+        public Queue<Node> runningNodes = new Queue<Node>();
         public override Color EditorColor
         {
             get
@@ -271,13 +271,7 @@ namespace Cheers.BehaviourTree
             while (runningNodes.Count > 0)
             {
                 var headNode = runningNodes.Peek();
-                // If this node is accessed by the first time, call its Enter() method
-                if (headNode.beginRunning)
-                {
-                    headNode.node.Enter(snapshot);
-                    headNode.beginRunning = false;
-                }
-                var childResult = headNode.node.Update(snapshot);
+                var childResult = headNode.Update(snapshot);
                 childResults.Add(childResult);
                 if (childResult.State == NodeState.Running)
                 {
@@ -287,8 +281,7 @@ namespace Cheers.BehaviourTree
                 }
                 // queued nodes should be proceeded as many as possible in a single frame
                 // so dequeue the head and proceed the next queued node
-                var finishedNode = runningNodes.Dequeue();
-                finishedNode.node.Leave(snapshot);
+                runningNodes.Dequeue();
             }
             // returns exit result when the whole sequence is finished
             SetState(NodeState.Finished, snapshot);
@@ -302,20 +295,8 @@ namespace Cheers.BehaviourTree
             {
                 if (child.IsMatch(snapshot))
                 {
-                    runningNodes.Enqueue(new QueuedNode(child));
+                    runningNodes.Enqueue(child);
                 }
-            }
-        }
-
-        public class QueuedNode
-        {
-            public bool beginRunning;
-            public Node node;
-
-            public QueuedNode(Node node)
-            {
-                this.node = node;
-                beginRunning = true;
             }
         }
     }
@@ -360,15 +341,9 @@ namespace Cheers.BehaviourTree
             {
                 if (child.IsMatch(snapshot))
                 {
-                    if (IsChildBeginRunning(child))
-                        child.Enter(snapshot);
-
                     var childResult = child.Update(snapshot);
                     childResults.Add(childResult);
                     var isChildRunning = childResult.State == NodeState.Running;
-
-                    if (!isChildRunning)
-                        child.Leave(snapshot);
                     switch (statusOperator)
                     {
                         case Operator.AND:
@@ -391,15 +366,6 @@ namespace Cheers.BehaviourTree
             }
             SetState(isRunning ? NodeState.Running : NodeState.Finished, snapshot);
             return result;
-        }
-
-        bool IsChildBeginRunning(Node child)
-        {
-            if (_prevFrameChildResults == null || _prevFrameChildResults.Length == 0) return true;
-
-            var prevResult = _prevFrameChildResults.FirstOrDefault(cr => cr.node == child);
-            if (prevResult.node == null) return true;
-            return prevResult.State != NodeState.Running;
         }
     }
 
