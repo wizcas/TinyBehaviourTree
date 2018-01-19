@@ -30,7 +30,7 @@ namespace Cheers.BehaviourTree
             }
         }
 
-        protected abstract bool CheckKeepPlaying(T snapshot);
+        protected abstract bool IsKeepPlaying(T snapshot);
         protected abstract bool Start(T snapshot);
         protected abstract bool Play(T snapshot);
         protected abstract bool Stop(T snapshot);
@@ -66,7 +66,7 @@ namespace Cheers.BehaviourTree
                 return new NodeResult(this) { state = NodeState.Invalid };
             }
 
-            var canPlay = CheckKeepPlaying(typedSnapshot);
+            var canPlay = IsKeepPlaying(typedSnapshot);
             bool isStillPlaying = false;
             if (canPlay)
             {

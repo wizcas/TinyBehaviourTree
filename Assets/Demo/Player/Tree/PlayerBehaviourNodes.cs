@@ -27,7 +27,7 @@ namespace Player.BehaviourTree
             return node;
         }
 
-        protected override bool CheckKeepPlaying(PlayerBlackboard snapshot)
+        protected override bool IsKeepPlaying(PlayerBlackboard snapshot)
         {
             // If there is no playing action OR the playing action is this action itself, 
             // we consider this action can be played
@@ -84,7 +84,7 @@ namespace Player.BehaviourTree
             return node;
         }
 
-        protected override bool CheckKeepPlaying(PlayerBlackboard snapshot)
+        protected override bool IsKeepPlaying(PlayerBlackboard snapshot)
         {
             return true;
         }
@@ -93,7 +93,7 @@ namespace Player.BehaviourTree
         {
             if (snapshot.order != null)
             {
-                snapshot.order.status = posture.HasValue ? posture.Value : snapshot.posture;
+                snapshot.order.posture = posture.HasValue ? posture.Value : snapshot.posture;
             }
             return false; // Status is an instant operation, so it always marked finished in every update
         }

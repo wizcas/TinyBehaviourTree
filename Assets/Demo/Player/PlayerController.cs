@@ -233,9 +233,9 @@ public class PlayerController : MonoBehaviour
 
     void OnReceiveOrder(PlayerOrder order)
     {
-        if (order.status.HasValue)
+        if (order.posture.HasValue)
         {
-            OnStatusChanged(order.status.Value);
+            OnStatusChanged(order.posture.Value);
         }
     }
 

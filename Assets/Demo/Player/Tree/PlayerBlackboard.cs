@@ -89,7 +89,7 @@ namespace Player.BehaviourTree
     [Serializable]
     public class PlayerOrder : IOrder
     {
-        public PlayerPosture? status;
+        public PlayerPosture? posture;
         public bool isStatusDirty;
     }
 }
