@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour
     PlayerMovement _mover;
 
     #region Status
-    PlayerStatus _status = PlayerStatus.Empty;
+    PlayerPosture _status = PlayerPosture.Empty;
     bool _isStatusDirty = true;
 
     [ReadOnly, SerializeField]
@@ -107,7 +107,7 @@ public class PlayerController : MonoBehaviour
         UpdateStatus();
         if (!IsDead)
         {
-            UpdateControl();
+            UpdateInput();
         }
         if (_endingPoint != null && transform.position.x >= _endingPoint.position.x)
         {
@@ -120,7 +120,7 @@ public class PlayerController : MonoBehaviour
     }
 
     #region Control
-    void UpdateControl()
+    void UpdateInput()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -150,12 +150,12 @@ public class PlayerController : MonoBehaviour
 
     void Run()
     {
-        SendBehaviourRequest(new PlayerBlackboard { status = PlayerStatus.Running });
+        SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running });
     }
 
     void Stop()
     {
-        SendBehaviourRequest(new PlayerBlackboard { status = PlayerStatus.Idle });
+        SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Idle });
     }
 
     void Damage(int dmg, DamageType type)
@@ -177,12 +177,12 @@ public class PlayerController : MonoBehaviour
     {
         SendBehaviourRequest(new PlayerBlackboard
         {
-            status = PlayerStatus.Empty,
+            posture = PlayerPosture.Empty,
             action = new PlayerAction(
                 PlayerActionType.Die,
                 OnAction(
                     () => _mover.DieCo(),
-                    () => SendBehaviourRequest(new PlayerBlackboard { status = PlayerStatus.Dead })
+                    () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Dead })
                     )
                 )
         }, true);
@@ -200,7 +200,7 @@ public class PlayerController : MonoBehaviour
                         PlayerActionType.Hit,
                         OnAction(
                             () => _mover.HitBackCo(),
-                            () => SendBehaviourRequest(new PlayerBlackboard { status = PlayerStatus.Running })
+                            () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running })
                         )
                     )
                 }, true);
@@ -216,7 +216,7 @@ public class PlayerController : MonoBehaviour
                 PlayerActionType.Cast,
                 OnAction(
                     () => _mover.CastCo(id),
-                    () => SendBehaviourRequest(new PlayerBlackboard { status = PlayerStatus.Running })
+                    () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Running })
                 )
             )
         });
@@ -239,7 +239,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void OnStatusChanged(PlayerStatus status)
+    void OnStatusChanged(PlayerPosture status)
     {
         //ConsoleProDebug.Watch("Status -> ", status.ToString());
         if (_status == status) return;
@@ -253,20 +253,20 @@ public class PlayerController : MonoBehaviour
         _isStatusDirty = false;
         switch (_status)
         {
-            case PlayerStatus.Idle:
+            case PlayerPosture.Idle:
                 _mover.Stop();
                 break;
-            case PlayerStatus.Running:
+            case PlayerPosture.Running:
                 _mover.Run();
                 break;
-            case PlayerStatus.Dead:
+            case PlayerPosture.Dead:
                 _mover.Reset();
                 //OnDead();
                 break;
-            case PlayerStatus.FallingAlive:
+            case PlayerPosture.FallingAlive:
                 _mover.Fall(true);
                 break;
-            case PlayerStatus.FallingDead:
+            case PlayerPosture.FallingDead:
                 _mover.Fall(false);
                 break;
             default:

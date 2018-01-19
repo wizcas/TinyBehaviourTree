@@ -26,6 +26,15 @@ namespace Cheers.BehaviourTree
     }
 
     [Serializable]
+    public abstract class SelectorNode<T> : SelectorNode where T : SelectorNode, new()
+    {
+        public static T New(string name, Precondition precondition = null)
+        {
+            return Node.MakeNode<T>(name, precondition);
+        }
+    }
+
+    [Serializable]
     public abstract class SelectorNode : ControlNode
     {
         [JsonIgnore]
@@ -83,7 +92,7 @@ namespace Cheers.BehaviourTree
     }
 
     [Serializable]
-    public class PrioritySelectorNode : SelectorNode
+    public class PrioritySelectorNode : SelectorNode<PrioritySelectorNode>
     {
         protected override Node Select(Blackboard snapshot, Node ignoreNode)
         {
@@ -97,7 +106,7 @@ namespace Cheers.BehaviourTree
         }
     }
     [SerializeField]
-    public class LastFirstSelectorNode : SelectorNode
+    public class LastFirstSelectorNode : SelectorNode<LastFirstSelectorNode>
     {
         [JsonIgnore]
         Node _lastUsedNode;
@@ -122,9 +131,16 @@ namespace Cheers.BehaviourTree
         }
     }
     [Serializable]
-    public class WeightedSelectorNode : SelectorNode
+    public class WeightedSelectorNode : SelectorNode<WeightedSelectorNode>
     {
         public float[] weights;
+
+        public static WeightedSelectorNode New(string name, float[] weights, Precondition precondition = null)
+        {
+            var node = Node.MakeNode<WeightedSelectorNode>(name, precondition);
+            node.SetWeights(weights);
+            return node;
+        }
 
         public void SetWeights(float[] weights)
         {
@@ -239,7 +255,10 @@ namespace Cheers.BehaviourTree
                 return ColorHelper.ByWeb("#e9ae83");
             }
         }
-
+        public static SequenceNode New(string name, Precondition precondition = null)
+        {
+            return Node.MakeNode<SequenceNode>(name, precondition);
+        }
         public override NodeResult Update(Blackboard snapshot)
         {
             var result = new NodeResult(this);
@@ -297,7 +316,6 @@ namespace Cheers.BehaviourTree
         /// AND means this node exits when all children are exited
         /// OR means this node exits when any child is exited
         /// </summary>
-        [JsonIgnore]
         public Operator statusOperator;
         public override Color EditorColor
         {
@@ -306,7 +324,12 @@ namespace Cheers.BehaviourTree
                 return ColorHelper.ByWeb("#8cb679");
             }
         }
-
+        public static ParallelNode New(string name, Operator op, Precondition precondition = null)
+        {
+            var node = Node.MakeNode<ParallelNode>(name, precondition);
+            node.statusOperator = op;
+            return node;
+        }
         public override NodeResult Update(Blackboard snapshot)
         {
             var result = new NodeResult(this);

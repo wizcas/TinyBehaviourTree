@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Player.BehaviourTree
 {
-    public enum PlayerStatus
+    public enum PlayerPosture
     {
         Empty,
         Idle,

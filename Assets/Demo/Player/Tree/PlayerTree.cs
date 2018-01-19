@@ -32,7 +32,7 @@ namespace Player.BehaviourTree
         {
             return new PlayerBlackboard()
             {
-                status = PlayerStatus.Idle,
+                posture = PlayerPosture.Idle,
                 isOnGround = true,
                 isGravityEnabled = true
             };
@@ -54,43 +54,74 @@ namespace Player.BehaviourTree
         {
             if (root == null)
             {
-                root = new ParallelNode() { name = "Root", statusOperator = ParallelNode.Operator.OR };
+                root = ParallelNode.New("Root", ParallelNode.Operator.OR, null);
+                //root = new ParallelNode() { name = "Root", statusOperator = ParallelNode.Operator.OR };
             }
             root.Clear();
 
             root.AddNodes(
-                new LastFirstSelectorNode() { name = "Action" }
+                LastFirstSelectorNode.New("Action")
                 .AddNodes(
-                    new LastFirstSelectorNode()
-                    {
-                        name = "Alive Actions",
-                        precondition = new PreconditionIsDead(false)
-                    }
-                    .AddNodes(new PlayerActionNode() { name = "Attack", precondition = new PreconditionActionType(PlayerActionType.Cast) })
-                    .AddNodes(new PlayerActionNode() { name = "Hit", precondition = new PreconditionActionType(PlayerActionType.Hit) })
-                    .AddNodes(new PlayerActionNode() { name = "Die", precondition = new PreconditionActionType(PlayerActionType.Die) })
+                    LastFirstSelectorNode.New("Alive Actions", new PreconditionIsDead(false))
+                    .AddNodes(
+                        PlayerActionNode.New("Attack", PlayerActionType.Cast, new PreconditionIsNodeAction()),
+                        PlayerActionNode.New("Hit", PlayerActionType.Hit, new PreconditionIsNodeAction()),
+                        PlayerActionNode.New("Die", PlayerActionType.Die, new PreconditionIsNodeAction())
+                    )
                 ),
-                new LastFirstSelectorNode() { name = "Status" }
+                LastFirstSelectorNode.New("Posture")
                 .AddNodes(
-                    new LastFirstSelectorNode()
-                    {
-                        name = "In Air w/ Alive",
-                        precondition = new PreconditionAnd(new PreconditionIsOnGround(false), new PreconditionIsGravityEnabled(true))
-                    }
-                    .AddNodes(new PlayerStatusNode() { name = "Falling Alive", precondition = new PreconditionIsDead(false), status = PlayerStatus.FallingAlive })
-                    .AddNodes(new PlayerStatusNode() { name = "Falling Dead", precondition = new PreconditionIsDead(true), status = PlayerStatus.FallingDead })
-                .AddNodes(PlayerStatusNode.MakeNode<PlayerStatusNode>("Falling Alive", new PreconditionSameStatus())),
-                    new LastFirstSelectorNode()
-                    {
-                        name = "On Ground",
-                        precondition = new PreconditionIsOnGround(true)
-                    }
-                    .AddNodes(new PlayerStatusNode() { name = "Empty", precondition = new PreconditionStatus(PlayerStatus.Empty) })
-                    .AddNodes(new PlayerStatusNode() { name = "Idle", precondition = new PreconditionStatus(PlayerStatus.Idle) })
-                    .AddNodes(new PlayerStatusNode() { name = "Running", precondition = new PreconditionStatus(PlayerStatus.Running) })
-                    .AddNodes(new PlayerStatusNode() { name = "Dead", precondition = new PreconditionStatus(PlayerStatus.Dead) })
+                    LastFirstSelectorNode.New("In Air + Gravity",
+                                                   new PreconditionAnd(
+                                                       new PreconditionIsOnGround(false),
+                                                       new PreconditionIsGravityEnabled(true)
+                                                      ))
+                    .AddNodes(
+                        PlayerPostureNode.New("Falling Alive", PlayerPosture.FallingAlive, new PreconditionIsDead(false)),
+                        PlayerPostureNode.New("Falling Dead", PlayerPosture.FallingDead, new PreconditionIsDead(true))
+                    ),
+                    LastFirstSelectorNode.New("On Ground", new PreconditionIsOnGround(true))
+                    .AddNodes(
+                        PlayerPostureNode.New("Empty", PlayerPosture.Empty, new PreconditionIsNodePosture()),
+                        PlayerPostureNode.New("Idle", PlayerPosture.Idle, new PreconditionIsNodePosture()),
+                        PlayerPostureNode.New("Running", PlayerPosture.Running, new PreconditionIsNodePosture()),
+                        PlayerPostureNode.New("Dead", PlayerPosture.Dead, new PreconditionIsNodePosture())
+                    )
                 )
             );
+
+            //root.AddNodes(
+            //    new LastFirstSelectorNode() { name = "Action" }
+            //    .AddNodes(
+            //        new LastFirstSelectorNode()
+            //        {
+            //            name = "Alive Actions",
+            //            precondition = new PreconditionIsDead(false)
+            //        }
+            //        .AddNodes(new PlayerActionNode() { name = "Attack", precondition = new PreconditionActionType(PlayerActionType.Cast) })
+            //        .AddNodes(new PlayerActionNode() { name = "Hit", precondition = new PreconditionActionType(PlayerActionType.Hit) })
+            //        .AddNodes(new PlayerActionNode() { name = "Die", precondition = new PreconditionActionType(PlayerActionType.Die) })
+            //    ),
+            //    new LastFirstSelectorNode() { name = "Status" }
+            //    .AddNodes(
+            //        new LastFirstSelectorNode()
+            //        {
+            //            name = "In Air w/ Alive",
+            //            precondition = new PreconditionAnd(new PreconditionIsOnGround(false), new PreconditionIsGravityEnabled(true))
+            //        }
+            //        .AddNodes(new PlayerPostureNode() { name = "Falling Alive", precondition = new PreconditionIsDead(false), posture = PlayerPosture.FallingAlive })
+            //        .AddNodes(new PlayerPostureNode() { name = "Falling Dead", precondition = new PreconditionIsDead(true), posture = PlayerPosture.FallingDead }),
+            //        new LastFirstSelectorNode()
+            //        {
+            //            name = "On Ground",
+            //            precondition = new PreconditionIsOnGround(true)
+            //        }
+            //        .AddNodes(new PlayerPostureNode() { name = "Empty", precondition = new PreconditionStatus(PlayerPosture.Empty) })
+            //        .AddNodes(new PlayerPostureNode() { name = "Idle", precondition = new PreconditionStatus(PlayerPosture.Idle) })
+            //        .AddNodes(new PlayerPostureNode() { name = "Running", precondition = new PreconditionStatus(PlayerPosture.Running) })
+            //        .AddNodes(new PlayerPostureNode() { name = "Dead", precondition = new PreconditionStatus(PlayerPosture.Dead) })
+            //    )
+            //);
             return root;
         }
 
@@ -127,7 +158,7 @@ namespace Player.BehaviourTree
             var request = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Hit, null),
-                status = PlayerStatus.Running,
+                posture = PlayerPosture.Running,
                 isOnGround = true,
                 playingAction = null,
             };
@@ -139,7 +170,7 @@ namespace Player.BehaviourTree
             var request = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Cast, null),
-                status = PlayerStatus.Idle,
+                posture = PlayerPosture.Idle,
                 isOnGround = true,
                 playingAction = null,
             };
@@ -151,7 +182,7 @@ namespace Player.BehaviourTree
             var request = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Die, null),
-                status = PlayerStatus.Idle,
+                posture = PlayerPosture.Idle,
                 isOnGround = false,
                 isGravityEnabled = true,
                 playingAction = null,
@@ -164,7 +195,7 @@ namespace Player.BehaviourTree
             var request = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Die, null),
-                status = PlayerStatus.Dead,
+                posture = PlayerPosture.Dead,
                 isOnGround = false,
                 isGravityEnabled = true,
             };

@@ -20,7 +20,7 @@ namespace Player.BehaviourTree
 
         protected override bool IsMatch(PlayerBlackboard snapshot)
         {
-            return (snapshot.status == PlayerStatus.Dead) == isDead;
+            return (snapshot.posture == PlayerPosture.Dead) == isDead;
         }
     }
 
@@ -55,20 +55,32 @@ namespace Player.BehaviourTree
 
     public class PreconditionStatus : Precondition<PlayerBlackboard>
     {
-        public PlayerStatus status;
-        public PreconditionStatus(PlayerStatus expect) { status = expect; }
+        public PlayerPosture status;
+        public PreconditionStatus(PlayerPosture expect) { status = expect; }
 
         protected override bool IsMatch(PlayerBlackboard snapshot)
         {
-            return snapshot.status == status;
+            return snapshot.posture == status;
         }
     }
 
-    public class PreconditionSameStatus : Precondition<PlayerBlackboard>{
+    public class PreconditionIsNodeAction : Precondition<PlayerBlackboard>
+    {
         protected override bool IsMatch(PlayerBlackboard snapshot)
         {
-            if(node is PlayerStatusNode){
-                return ((PlayerStatusNode)node).status == snapshot.status;
+            if (snapshot.action != null && node is PlayerActionNode)
+            {
+                return ((PlayerActionNode)node).actionType == snapshot.action.type;
+            }
+            return false;
+        }
+    }
+
+    public class PreconditionIsNodePosture : Precondition<PlayerBlackboard>{
+        protected override bool IsMatch(PlayerBlackboard snapshot)
+        {
+            if(node is PlayerPostureNode){
+                return ((PlayerPostureNode)node).posture == snapshot.posture;
             }
             return false;
         }

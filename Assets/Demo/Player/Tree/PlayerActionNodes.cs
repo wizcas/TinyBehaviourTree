@@ -15,9 +15,18 @@ namespace Player.BehaviourTree
 {
     [Serializable]
     [PrettyLog.Provider("PlayerTree", "action", "orange", "blue")]
-    public class PlayerActionNode : ActionNode<PlayerBlackboard>
+    public class PlayerActionNode : BehaviourNode<PlayerBlackboard>
     {
+        public PlayerActionType actionType;
         PlayerAction _playingAction;
+
+        public static PlayerActionNode New(string name, PlayerActionType type, Precondition precondition = null)
+        {
+            var node = Node.MakeNode<PlayerActionNode>(name, precondition);
+            node.actionType = type;
+            return node;
+        }
+
         protected override bool CanPlay(PlayerBlackboard snapshot)
         {
             // If there is no playing action OR the playing action is this action itself, 
@@ -53,9 +62,17 @@ namespace Player.BehaviourTree
 
     [Serializable]
     [PrettyLog.Provider("PlayerTree", "status", "orange", "green")]
-    public class PlayerStatusNode : ActionNode<PlayerBlackboard>
+    public class PlayerPostureNode : BehaviourNode<PlayerBlackboard>
     {
-        public PlayerStatus? status = null;
+        public PlayerPosture? posture = null;
+
+
+        public static PlayerPostureNode New(string name, PlayerPosture posture, Precondition precondition = null)
+        {
+            var node = Node.MakeNode<PlayerPostureNode>(name, precondition);
+            node.posture = posture;
+            return node;
+        }
 
         protected override bool CanPlay(PlayerBlackboard snapshot)
         {
@@ -66,7 +83,7 @@ namespace Player.BehaviourTree
         {
             if (snapshot.order != null)
             {
-                snapshot.order.status = status.HasValue ? status.Value : snapshot.status;
+                snapshot.order.status = posture.HasValue ? posture.Value : snapshot.posture;
             }
             return false; // Status is an instant operation, so it always marked finished in every update
         }

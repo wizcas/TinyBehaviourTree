@@ -194,13 +194,18 @@ namespace Cheers.BehaviourTree
         }
         #endregion
 
-        public static T MakeNode<T>(string name, Precondition precondition) where T: Node, new()
+        protected static T MakeNode<T>(string name, Precondition precondition) where T: Node, new()
         {
-            return new T
+            var node = new T
             {
                 name = name,
                 precondition = precondition
             };
+            if (node.precondition != null)
+            {
+                node.precondition.node = node;
+            }
+            return node;
         }
 
         public Node()

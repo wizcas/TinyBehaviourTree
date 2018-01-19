@@ -12,7 +12,7 @@ using UnityEngine;
 namespace Cheers.BehaviourTree
 {
     [Serializable]
-    public abstract class ActionNode<T> : Node where T: Blackboard
+    public abstract class BehaviourNode<T> : Node where T: Blackboard
     {
         
         public override bool IsLeaf

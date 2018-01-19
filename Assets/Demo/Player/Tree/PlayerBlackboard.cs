@@ -20,7 +20,7 @@ namespace Player.BehaviourTree
         #endregion
 
         #region Data
-        public PlayerStatus? status;
+        public PlayerPosture? posture;
         public bool? isOnGround;
         public bool? isGravityEnabled;
         public PlayerAction action;
@@ -36,7 +36,7 @@ namespace Player.BehaviourTree
             get
             {
                 return
-                    !status.HasValue &&
+                    !posture.HasValue &&
                     !isOnGround.HasValue &&
                     !isGravityEnabled.HasValue &&
                     action == null;
@@ -45,7 +45,7 @@ namespace Player.BehaviourTree
 
         public override void Copy(PlayerBlackboard target)
         {
-            target.status = status;
+            target.posture = posture;
             target.isOnGround = isOnGround;
             target.isGravityEnabled = isGravityEnabled;
             target.action = action;
@@ -61,9 +61,9 @@ namespace Player.BehaviourTree
 
         protected override void DoApplyChanges(PlayerBlackboard change)
         {
-            if (change.status.HasValue)
+            if (change.posture.HasValue)
             {
-                status = change.status.Value;
+                posture = change.posture.Value;
             }
             if (change.isOnGround.HasValue)
             {
@@ -89,7 +89,7 @@ namespace Player.BehaviourTree
     [Serializable]
     public class PlayerOrder : IOrder
     {
-        public PlayerStatus? status;
+        public PlayerPosture? status;
         public bool isStatusDirty;
     }
 }

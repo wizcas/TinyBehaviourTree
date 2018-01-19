@@ -44,7 +44,7 @@ namespace Player.BehaviourTree.Tests
             var snapshot = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Hit, null),
-                status = PlayerStatus.Running,
+                posture = PlayerPosture.Running,
                 isOnGround = true,
             };
             var result = BT.TestUpdate(rootNode, snapshot, null);
@@ -58,7 +58,7 @@ namespace Player.BehaviourTree.Tests
             var snapshot = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Cast, null),
-                status = PlayerStatus.Idle,
+                posture = PlayerPosture.Idle,
                 isOnGround = true,
             };
             var result = BT.TestUpdate(rootNode, snapshot, null);
@@ -72,7 +72,7 @@ namespace Player.BehaviourTree.Tests
             var snapshot = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Die, null),
-                status = PlayerStatus.Idle,
+                posture = PlayerPosture.Idle,
                 isOnGround = false,
                 isGravityEnabled = true,
             };
@@ -88,7 +88,7 @@ namespace Player.BehaviourTree.Tests
             var snapshot = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Die, null),
-                status = PlayerStatus.Dead,
+                posture = PlayerPosture.Dead,
                 isOnGround = false,
                 isGravityEnabled = true,
             };
@@ -103,7 +103,7 @@ namespace Player.BehaviourTree.Tests
             var snapshot = new PlayerBlackboard()
             {
                 action = new PlayerAction(PlayerActionType.Die, null),
-                status = PlayerStatus.Dead,
+                posture = PlayerPosture.Dead,
                 isOnGround = true,
                 isGravityEnabled = true,
             };
