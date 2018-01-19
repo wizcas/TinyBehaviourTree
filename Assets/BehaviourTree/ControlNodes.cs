@@ -61,7 +61,7 @@ namespace Cheers.BehaviourTree
             else
             {
                 // Select another node when no previously selected node is running
-                _runningNode = Select(snapshot, _runningNode);
+                _runningNode = Select(snapshot);
                 if (_runningNode == null)
                 {
                     SetState(NodeState.Finished, snapshot);
@@ -88,17 +88,16 @@ namespace Cheers.BehaviourTree
             return nodeResult.State;
         }
 
-        protected abstract Node Select(Blackboard snapshot, Node ignoredNode);
+        protected abstract Node Select(Blackboard snapshot);
     }
 
     [Serializable]
     public class PrioritySelectorNode : SelectorNode<PrioritySelectorNode>
     {
-        protected override Node Select(Blackboard snapshot, Node ignoreNode)
+        protected override Node Select(Blackboard snapshot)
         {
             foreach (var child in children)
             {
-                if (child == ignoreNode) continue;
                 if (child.IsMatch(snapshot))
                     return child;
             }
@@ -111,7 +110,7 @@ namespace Cheers.BehaviourTree
         [JsonIgnore]
         Node _lastUsedNode;
 
-        protected override Node Select(Blackboard snapshot, Node ignoreNode)
+        protected override Node Select(Blackboard snapshot)
         {
             if (_lastUsedNode != null && _lastUsedNode.IsMatch(snapshot))
             {
@@ -120,7 +119,6 @@ namespace Cheers.BehaviourTree
 
             foreach (var child in children)
             {
-                if (child == ignoreNode) continue;
                 if (child != _lastUsedNode && child.IsMatch(snapshot))
                 {
                     _lastUsedNode = child;
@@ -167,7 +165,7 @@ namespace Cheers.BehaviourTree
             SetNodeWeight(childIndex, weight);
         }
 
-        protected override Node Select(Blackboard snapshot, Node ignoreNode)
+        protected override Node Select(Blackboard snapshot)
         {
             if (children.Count == 0)
                 return null;

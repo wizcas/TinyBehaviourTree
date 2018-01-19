@@ -121,8 +121,7 @@ namespace Cheers.BehaviourTree
     {
         static int NODE_COUNT = 0;
 
-        public int id;
-        public string __type;        
+        public int id;      
         public Precondition precondition;
         public string name;
         [NonSerialized]
