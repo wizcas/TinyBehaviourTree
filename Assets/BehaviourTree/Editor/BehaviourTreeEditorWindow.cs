@@ -21,6 +21,7 @@ namespace Cheers.BehaviourTree.Editor
         Vector2 _pan;
         BehaviourTreeData _treeData;
         GUIStyle _wndStyle;
+        float _scale = 1f;
 
         static Texture2D BackgroundTex
         {
@@ -137,12 +138,13 @@ namespace Cheers.BehaviourTree.Editor
             _wndStyle.focused.background = NodeBackgroundTex;
             _wndStyle.hover.background = NodeBackgroundTex;
             _wndStyle.active.background = NodeBackgroundTex;
+            _wndStyle.fontSize = Mathf.RoundToInt(12 * _scale);
         }
 
         void Pan()
         {
             var ev = Event.current;
-            if (_hasTarget && ev.type == EventType.MouseDrag && ev.button == 2)
+            if (_hasTarget && ev.type == EventType.MouseDrag && (ev.button == 2 || ev.button == 0))
             {
                 _pan += ev.delta;
                 Repaint();
@@ -195,6 +197,18 @@ namespace Cheers.BehaviourTree.Editor
                 _pan = Vector2.zero + CanvasRect.size * .5f;
             }
 
+            if (GUILayout.Button("Scale -0.1", EditorStyles.toolbarButton))
+            {
+                _scale -= .1f;
+            }
+            if (GUILayout.Button("Scale +0.1", EditorStyles.toolbarButton))
+            {
+                _scale += .1f;
+            }
+            if(GUILayout.Button("Reset scale", EditorStyles.toolbarButton)){
+                _scale = 1f;
+            }
+
             GUILayout.FlexibleSpace();
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
@@ -239,11 +253,21 @@ namespace Cheers.BehaviourTree.Editor
         {
             var wndRect = node._editorRect;
             wndRect.position += _pan;
-            return wndRect;
+            //return wndRect;
+
+            var scaledRect = wndRect;
+            scaledRect.position *= _scale;
+            scaledRect.size *= _scale;
+
+            return scaledRect;
         }
         void SetNodeRect(Node node, Rect nodeWnd)
         {
-            node._editorRect = nodeWnd;
+            var rawWnd = nodeWnd;
+            rawWnd.position /= _scale;
+            rawWnd.size /= _scale;
+            //node._editorRect = nodeWnd;
+            node._editorRect = rawWnd;
             node._editorRect.position -= _pan;
         }
 
