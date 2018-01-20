@@ -113,7 +113,7 @@ public class PlayerController : MonoBehaviour
     void UpdateInput()
     {
         // Reset
-        if (Input.GetKeyDown(KeyCode.Return | KeyCode.KeypadEnter))
+        if (Input.GetKeyDown(KeyCode.Return))
         {
             Spawn();
             return;
@@ -198,12 +198,6 @@ public class PlayerController : MonoBehaviour
         SendBehaviourRequest(new PlayerBlackboard
         {
             posture = PlayerPosture.Dead,
-            //action = new PlayerAction(
-            //    PlayerActionType.Die,
-            //    OnAction(() => _mover.DieCo()),
-            //    () => SendBehaviourRequest(new PlayerBlackboard { posture = PlayerPosture.Dead }),
-            //    () => _actionCoroutine != null
-            //)
         }, true);
     }
 
@@ -250,9 +244,7 @@ public class PlayerController : MonoBehaviour
 
     void OnPostureChanged(PlayerPosture newPosture)
     {
-        //ConsoleProDebug.Watch("Status -> ", status.ToString());
         if (_posture == newPosture) return;
-        //PrettyLog.Log("Change status: {0} => {1}", _status, status);
         _posture = newPosture; // Status will be updated in the next frame
         _isStatusDirty = true;
     }
