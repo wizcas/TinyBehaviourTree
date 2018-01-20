@@ -143,4 +143,10 @@ namespace Cheers.BehaviourTree
 
         protected abstract void ExecuteOrder(U newOrder);
     }
+
+    public interface IOrder
+    {
+
+    }
+
 }

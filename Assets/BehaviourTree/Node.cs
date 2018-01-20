@@ -111,17 +111,12 @@ namespace Cheers.BehaviourTree
         #endregion
     }
 
-    public interface IOrder
-    {
-
-    }
-    
     [Serializable]
     public abstract class Node
     {
         static int NODE_COUNT = 0;
 
-        public int id;      
+        public int id;
         public Precondition precondition;
         public string name;
         [NonSerialized]
@@ -151,7 +146,8 @@ namespace Cheers.BehaviourTree
         [JsonIgnore]
         public Color EditorDarkColor
         {
-            get {
+            get
+            {
                 float h, s, v;
                 Color.RGBToHSV(EditorColor, out h, out s, out v);
                 v -= .15f;
@@ -160,7 +156,7 @@ namespace Cheers.BehaviourTree
         }
         #endregion
 
-        protected static T MakeNode<T>(string name, Precondition precondition) where T: Node, new()
+        protected static T MakeNode<T>(string name, Precondition precondition) where T : Node, new()
         {
             var node = new T
             {
@@ -182,9 +178,9 @@ namespace Cheers.BehaviourTree
         public void UpdateParent(Node parent)
         {
             this.parent = parent;
-            foreach(var child in children)
+            foreach (var child in children)
             {
-                if(child.parent != this)
+                if (child.parent != this)
                 {
                     child.UpdateParent(this);
                 }
@@ -243,11 +239,11 @@ namespace Cheers.BehaviourTree
                 SetState(NodeState.Running, snapshot);
             return new NodeResult(this);
         }
-        public virtual void Enter(Blackboard snapshot) {}
-        public virtual void Leave(Blackboard snapshot) {}
+        public virtual void Enter(Blackboard snapshot) { }
+        public virtual void Leave(Blackboard snapshot) { }
 
         public bool IsMatch(Blackboard snapshot)
-        {            
+        {
             var ret = precondition == null || precondition.IsMatch(snapshot);
             BTLogger.Log(this, "IsMatch {0}? {1}", precondition, ret.Pretty());
             // exit running node if precondition is not valid anymore
@@ -255,6 +251,7 @@ namespace Cheers.BehaviourTree
             return ret;
         }
 
+        #region Editor Use & Data persistent
         public override string ToString()
         {
             return DisplayName;
@@ -291,6 +288,7 @@ namespace Cheers.BehaviourTree
             //PrettyLog.Log("Deserialized. Root: {0}, Data Size: {1}", node, data.Length);
             return node;
         }
+        #endregion
     }
 }
 

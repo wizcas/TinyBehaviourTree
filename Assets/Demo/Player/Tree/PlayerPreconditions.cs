@@ -24,16 +24,6 @@ namespace Player.BehaviourTree
         }
     }
 
-    public class PreconditionActionType : Precondition<PlayerBlackboard>
-    {
-        public PlayerActionType actionType;
-        public PreconditionActionType(PlayerActionType expect) { actionType = expect; }
-        protected override bool IsMatch(PlayerBlackboard snapshot)
-        {
-            return snapshot.action != null && snapshot.action.type == actionType;
-        }
-    }
-
     public class PreconditionIsOnGround : Precondition<PlayerBlackboard>
     {
         public bool isOnGround;
@@ -50,17 +40,6 @@ namespace Player.BehaviourTree
         protected override bool IsMatch(PlayerBlackboard snapshot)
         {
             return snapshot.isGravityEnabled == isGravityEnabled;
-        }
-    }
-
-    public class PreconditionStatus : Precondition<PlayerBlackboard>
-    {
-        public PlayerPosture status;
-        public PreconditionStatus(PlayerPosture expect) { status = expect; }
-
-        protected override bool IsMatch(PlayerBlackboard snapshot)
-        {
-            return snapshot.posture == status;
         }
     }
 
